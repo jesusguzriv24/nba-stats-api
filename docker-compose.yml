@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: nba_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nba_user
+      POSTGRES_PASSWORD: nba_password
+      POSTGRES_DB: nba_stats
+    ports:
+      - "5432:5432"
+    volumes:
+      - nba_db_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: nba_api
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+asyncpg://nba_user:nba_password@db:5432/nba_stats
+    ports:
+      - "8000:8000"
+
+volumes:
+  nba_db_data:

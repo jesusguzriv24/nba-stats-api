@@ -24,4 +24,5 @@ jobs:
 
       - name: Run main.py
         run: |
-          python app/scrappers/main.py
+          cd ${{ github.workspace }}
+          python -m app.scrappers.main

@@ -5,7 +5,7 @@ from sqlalchemy.types import Enum as SQLAlchemyEnum
 from enum import Enum as PythonEnum
 from app.core.database import Base
 
-class GameType(PythonEnum):
+class GameType(str, PythonEnum):
     RS = "RS"
     PI = "PI"
     PO = "PO"

@@ -4,7 +4,7 @@ from enum import Enum as PythonEnum
 from pydantic import BaseModel, ConfigDict
 from app.schemas.team import TeamResponse
 
-class GameType(PythonEnum):
+class GameType(str, PythonEnum):
     RS = "RS"
     PI = "PI"
     PO = "PO"

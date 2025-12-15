@@ -55,7 +55,7 @@ else:
 print(" [-] Creating async engine...")
 engine = create_async_engine(
     database_url,
-    echo=True,  # Set to False in production to reduce noise
+    echo=False,  # Set to False in production to reduce noise
     connect_args=connect_args,
     poolclass=NullPool,  # Disable pooling for serverless; puedes cambiar si quieres
 )

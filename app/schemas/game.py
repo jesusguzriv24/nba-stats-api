@@ -1,8 +1,13 @@
 from typing import List, Optional
 from datetime import date
+from enum import Enum as PythonEnum
 from pydantic import BaseModel, ConfigDict
 from app.schemas.team import TeamResponse
 
+class GameType(PythonEnum):
+    RS = "RS"
+    PI = "PI"
+    PO = "PO"
 
 # ------------------------------------------------------------------
 # SHARED BASE SCHEMA
@@ -13,7 +18,7 @@ class GameBase(BaseModel):
     """
     date: date
     season: int
-    is_playoffs: bool = False
+    game_type: GameType = GameType.RS  # Default to Regular Season
     status: str = "Scheduled"  # Nuevo campo: "Scheduled", "Final", "Live"
     
     # Scores

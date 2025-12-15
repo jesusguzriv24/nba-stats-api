@@ -1,7 +1,14 @@
-from sqlalchemy import Column, String, Integer, Date, Boolean, ForeignKey
-from sqlalchemy.dialects.postgresql import JSONB  # Import JSONB for efficient JSON storage in Postgres
+from sqlalchemy import Column, String, Integer, Date, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
-from app.core.database import Base 
+from sqlalchemy.types import Enum as SQLAlchemyEnum
+from enum import Enum as PythonEnum
+from app.core.database import Base
+
+class GameType(PythonEnum):
+    RS = "RS"
+    PI = "PI"
+    PO = "PO"
 
 class Game(Base):
     """
@@ -19,8 +26,7 @@ class Game(Base):
     # ------------------------------------------------------------------
     date = Column(Date, nullable=False, index=True)
     season = Column(Integer, nullable=False, index=True)  # e.g., 2024 for the 2024-25 season
-    is_playoffs = Column(Boolean, default=False)
-    
+    game_type = Column(SQLAlchemyEnum(GameType), default=GameType.RS, nullable=False)
     status = Column(String, default="Scheduled") # "Scheduled", "Final"
 
     # ------------------------------------------------------------------

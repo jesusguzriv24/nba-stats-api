@@ -1,4 +1,3 @@
-# app/api/v1/routes/players.py
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, HTTPException
@@ -9,7 +8,7 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.models.player import Player
 from app.models.player_game_stats import PlayerGameStats
-from app.models.game import Game
+from app.models.game import Game, GameType
 from app.schemas.player import PlayerResponse
 from app.schemas.player_game_stats import PlayerGameStatsResponse
 
@@ -61,30 +60,43 @@ async def get_player(player_id: int, db: AsyncSession = Depends(get_db)):
 async def get_player_games(
     player_id: int,
     season: Optional[int] = Query(None),
-    is_playoffs: Optional[bool] = Query(None),
+    game_type: Optional[GameType] = Query(
+        None,
+        description="Game type filter: RS (Regular Season), PI (Play-In), PO (Playoffs)",
+    ),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
 ):
-    # Base: stats de ese jugador
+
     stmt = select(PlayerGameStats).where(PlayerGameStats.player_id == player_id)
 
-    # Si se filtra por temporada y/o playoffs, unimos con Game de forma explícita
-    if season is not None or is_playoffs is not None:
+    if season is not None or game_type is not None:
         stmt = stmt.join(Game, Game.id == PlayerGameStats.game_id)
+
         if season is not None:
             stmt = stmt.where(Game.season == season)
-        if is_playoffs is not None:
-            stmt = stmt.where(Game.is_playoffs == is_playoffs)
 
-    stmt = stmt.order_by(PlayerGameStats.game_id.desc()).offset(skip).limit(limit)
-    stmt = stmt.order_by(PlayerGameStats.game_id.desc()).offset(skip).limit(limit)
-    stmt = stmt.options(
-        selectinload(PlayerGameStats.player).selectinload(Player.team),
-        selectinload(PlayerGameStats.team)
+        if game_type is not None:
+            stmt = stmt.where(Game.game_type == game_type)
+
+    stmt = (
+        stmt.order_by(PlayerGameStats.game_id.desc())
+        .offset(skip)
+        .limit(limit)
+        .options(
+            selectinload(PlayerGameStats.player).selectinload(Player.team),
+            selectinload(PlayerGameStats.team),
+        )
     )
+
     res = await db.execute(stmt)
     stats = res.scalars().all()
+
     if not stats:
-        raise HTTPException(status_code=404, detail="No player stats found for this player with the given filters")
+        raise HTTPException(
+            status_code=404,
+            detail="No player stats found for this player with the given filters",
+        )
+
     return stats

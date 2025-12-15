@@ -7,7 +7,7 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.models.game import Game
+from app.models.game import Game, GameType
 from app.models.player_game_stats import PlayerGameStats
 from app.models.team_game_stats import TeamGameStats
 from app.schemas.datasets import PlayerGameDatasetRow, TeamGameDatasetRow
@@ -23,7 +23,10 @@ async def get_player_game_dataset(
     season: Optional[int] = Query(None),
     from_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
     to_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
-    is_playoffs: Optional[bool] = Query(None),
+    game_type: Optional[GameType] = Query(
+        None,
+        description="Game type filter: RS (Regular Season), PI (Play-In), PO (Playoffs)",
+    ),
     team_id: Optional[int] = Query(None),
     player_id: Optional[int] = Query(None),
     limit: int = Query(10_000, ge=1, le=100_000),
@@ -42,7 +45,7 @@ async def get_player_game_dataset(
             PlayerGameStats.game_id,
             Game.date.label("game_date"),
             Game.season,
-            Game.is_playoffs,
+            Game.game_type,  
             PlayerGameStats.team_id,
             PlayerGameStats.player_id,
             PlayerGameStats.is_starter,
@@ -80,31 +83,49 @@ async def get_player_game_dataset(
     # Filters
     if season is not None:
         stmt = stmt.where(Game.season == season)
-    if is_playoffs is not None:
-        stmt = stmt.where(Game.is_playoffs == is_playoffs)
+
+    if game_type is not None:
+        stmt = stmt.where(Game.game_type == game_type)
+
     if from_date:
         try:
             d = datetime.fromisoformat(from_date).date()
         except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid from_date format, expected YYYY-MM-DD")
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid from_date format, expected YYYY-MM-DD",
+            )
         stmt = stmt.where(Game.date >= d)
+
     if to_date:
         try:
             d = datetime.fromisoformat(to_date).date()
         except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid to_date format, expected YYYY-MM-DD")
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid to_date format, expected YYYY-MM-DD",
+            )
         stmt = stmt.where(Game.date <= d)
+
     if team_id is not None:
         stmt = stmt.where(PlayerGameStats.team_id == team_id)
+
     if player_id is not None:
         stmt = stmt.where(PlayerGameStats.player_id == player_id)
 
-    stmt = stmt.order_by(Game.date.desc(), PlayerGameStats.game_id.desc()).offset(skip).limit(limit)
+    stmt = (
+        stmt.order_by(Game.date.desc(), PlayerGameStats.game_id.desc())
+        .offset(skip)
+        .limit(limit)
+    )
 
     res = await db.execute(stmt)
     rows = res.all()
     if not rows:
-        raise HTTPException(status_code=404, detail="No player game stats found for given filters")
+        raise HTTPException(
+            status_code=404,
+            detail="No player game stats found for given filters",
+        )
 
     out: List[PlayerGameDatasetRow] = []
 
@@ -122,7 +143,7 @@ async def get_player_game_dataset(
                 game_id=r.game_id,
                 game_date=r.game_date,
                 season=r.season,
-                is_playoffs=r.is_playoffs,
+                game_type=r.game_type, 
                 team_id=r.team_id,
                 opponent_id=opponent_id,
                 is_home_game=is_home_game,
@@ -142,7 +163,7 @@ async def get_player_game_dataset(
                 fg3a=r.fg3a,
                 fg3_pct=r.fg3_pct,
                 ft=r.ft,
-                fta=r.ft,
+                fta=r.fta,
                 ft_pct=r.ft_pct,
                 ts_pct=r.ts_pct,
                 efg_pct=r.efg_pct,
@@ -165,7 +186,10 @@ async def get_team_game_dataset(
     season: Optional[int] = Query(None),
     from_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
     to_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
-    is_playoffs: Optional[bool] = Query(None),
+    game_type: Optional[GameType] = Query(
+        None,
+        description="Game type filter: RS (Regular Season), PI (Play-In), PO (Playoffs)",
+    ),
     team_id: Optional[int] = Query(None),
     limit: int = Query(10_000, ge=1, le=100_000),
     skip: int = Query(0, ge=0),
@@ -182,11 +206,11 @@ async def get_team_game_dataset(
             TeamGameStats.game_id,
             Game.date.label("game_date"),
             Game.season,
-            Game.is_playoffs,
+            Game.game_type,  
             TeamGameStats.team_id,
             TeamGameStats.opponent_id,
             TeamGameStats.is_home_game,
-            # Scoreboard context: we derive team_score/opponent_score from Game
+            # Scoreboard context
             Game.home_team_id,
             Game.visitor_team_id,
             Game.home_score,
@@ -210,29 +234,46 @@ async def get_team_game_dataset(
     # Filters
     if season is not None:
         stmt = stmt.where(Game.season == season)
-    if is_playoffs is not None:
-        stmt = stmt.where(Game.is_playoffs == is_playoffs)
+
+    if game_type is not None:
+        stmt = stmt.where(Game.game_type == game_type)
+
     if from_date:
         try:
             d = datetime.fromisoformat(from_date).date()
         except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid from_date format, expected YYYY-MM-DD")
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid from_date format, expected YYYY-MM-DD",
+            )
         stmt = stmt.where(Game.date >= d)
+
     if to_date:
         try:
             d = datetime.fromisoformat(to_date).date()
         except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid to_date format, expected YYYY-MM-DD")
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid to_date format, expected YYYY-MM-DD",
+            )
         stmt = stmt.where(Game.date <= d)
+
     if team_id is not None:
         stmt = stmt.where(TeamGameStats.team_id == team_id)
 
-    stmt = stmt.order_by(Game.date.desc(), TeamGameStats.game_id.desc()).offset(skip).limit(limit)
+    stmt = (
+        stmt.order_by(Game.date.desc(), TeamGameStats.game_id.desc())
+        .offset(skip)
+        .limit(limit)
+    )
 
     res = await db.execute(stmt)
     rows = res.all()
     if not rows:
-        raise HTTPException(status_code=404, detail="No team game stats found for given filters")
+        raise HTTPException(
+            status_code=404,
+            detail="No team game stats found for given filters",
+        )
 
     out: List[TeamGameDatasetRow] = []
 
@@ -250,7 +291,7 @@ async def get_team_game_dataset(
                 game_id=r.game_id,
                 game_date=r.game_date,
                 season=r.season,
-                is_playoffs=r.is_playoffs,
+                game_type=r.game_type, 
                 team_id=r.team_id,
                 opponent_id=r.opponent_id,
                 is_home_game=r.is_home_game,

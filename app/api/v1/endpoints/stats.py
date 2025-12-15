@@ -1,12 +1,12 @@
 # app/api/v1/routes/stats.py
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
 from app.core.database import get_db
 from app.models.team_game_stats import TeamGameStats
-from app.models.game import Game
+from app.models.game import Game, GameType
 from app.schemas.team_stats_rank import TeamStatsRank
 
 router = APIRouter()
@@ -15,7 +15,10 @@ router = APIRouter()
 @router.get("/teams", response_model=List[TeamStatsRank])
 async def team_rankings(
     season: int = Query(...),
-    is_playoffs: bool | None = Query(None),
+    game_type: Optional[GameType] = Query(
+        None,
+        description="Game type filter: RS (Regular Season), PI (Play-In), PO (Playoffs)",
+    ),
     sort_by: str = Query("offensive_rating"),
     limit: int = Query(30, ge=1, le=30),
     db: AsyncSession = Depends(get_db),
@@ -46,10 +49,14 @@ async def team_rankings(
         .where(Game.season == season)
     )
 
-    if is_playoffs is not None:
-        stmt = stmt.where(Game.is_playoffs == is_playoffs)
+    if game_type is not None:
+        stmt = stmt.where(Game.game_type == game_type)
 
-    stmt = stmt.group_by(TeamGameStats.team_id).order_by(sort_column.desc()).limit(limit)
+    stmt = (
+        stmt.group_by(TeamGameStats.team_id)
+        .order_by(sort_column.desc())
+        .limit(limit)
+    )
 
     res = await db.execute(stmt)
     rows = res.all()

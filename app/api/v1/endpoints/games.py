@@ -1,4 +1,3 @@
-# app/api/v1/routes/games.py
 from typing import List, Optional
 from datetime import datetime
 
@@ -8,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
-from app.models.game import Game
+from app.models.game import Game, GameType
 from app.models.team_game_stats import TeamGameStats
 from app.models.player_game_stats import PlayerGameStats
 from app.models.player import Player
@@ -27,38 +26,67 @@ async def list_games(
     to_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
     home_team_id: Optional[int] = Query(None),
     visitor_team_id: Optional[int] = Query(None),
-    is_playoffs: Optional[bool] = Query(None),
+    game_type: Optional[GameType] = Query(
+        None,
+        description="Game type filter: RS (Regular Season), PI (Play-In), PO (Playoffs)",
+    ),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Game)
+
     if season is not None:
         stmt = stmt.where(Game.season == season)
-    if is_playoffs is not None:
-        stmt = stmt.where(Game.is_playoffs == is_playoffs)
+
+    if game_type is not None:
+        stmt = stmt.where(Game.game_type == game_type)
+
     if home_team_id is not None:
         stmt = stmt.where(Game.home_team_id == home_team_id)
+
     if visitor_team_id is not None:
         stmt = stmt.where(Game.visitor_team_id == visitor_team_id)
+
     if from_date:
         try:
             d = datetime.fromisoformat(from_date).date()
             stmt = stmt.where(Game.date >= d)
         except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid from_date format, expected YYYY-MM-DD")
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid from_date format, expected YYYY-MM-DD",
+            )
+
     if to_date:
         try:
             d = datetime.fromisoformat(to_date).date()
             stmt = stmt.where(Game.date <= d)
         except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid to_date format, expected YYYY-MM-DD")
-    stmt = stmt.order_by(Game.date.desc()).offset(skip).limit(limit)
-    stmt = stmt.options(selectinload(Game.home_team), selectinload(Game.visitor_team))
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid to_date format, expected YYYY-MM-DD",
+            )
+
+    stmt = (
+        stmt.order_by(Game.date.desc())
+        .offset(skip)
+        .limit(limit)
+        .options(
+            selectinload(Game.home_team),
+            selectinload(Game.visitor_team),
+        )
+    )
+
     res = await db.execute(stmt)
     games = res.scalars().all()
+
     if not games:
-        raise HTTPException(status_code=404, detail="No games found with the given filters")
+        raise HTTPException(
+            status_code=404,
+            detail="No games found with the given filters",
+        )
+
     return games
 
 

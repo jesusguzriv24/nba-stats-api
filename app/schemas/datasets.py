@@ -1,14 +1,14 @@
-# app/schemas/datasets.py
 from datetime import date
 from pydantic import BaseModel
 from typing import Optional
 
+from app.schemas.game import GameType
 
 class PlayerGameDatasetRow(BaseModel):
     game_id: int
     game_date: date
     season: int
-    is_playoffs: bool
+    game_type: GameType
 
     team_id: int
     opponent_id: int
@@ -50,8 +50,8 @@ class TeamGameDatasetRow(BaseModel):
     game_id: int
     game_date: date
     season: int
-    is_playoffs: bool
-
+    game_type: GameType
+    
     team_id: int
     opponent_id: int
     is_home_game: bool

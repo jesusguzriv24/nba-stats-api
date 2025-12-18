@@ -294,7 +294,7 @@ async def populate_games_and_stats(df: pd.DataFrame):
                     print(f"Skipping row {idx}: Game already exists.")
                     continue
 
-                season = date_obj.year if date_obj.month >= 8 else date_obj.year - 1
+                season = date_obj.year + 1 if date_obj.month >= 8 else date_obj.year
 
                 raw_game_type = str(row.get("Game_Type") or "").strip().upper()
                 if raw_game_type == "RS":

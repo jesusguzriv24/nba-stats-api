@@ -1937,7 +1937,7 @@
 	},
 	{
 		"id" : 130,
-		"first_name" : "NFaly",
+		"first_name" : "N'Faly",
 		"last_name" : "Dante",
 		"country" : "ML",
 		"college" : "Oregon",
@@ -2732,7 +2732,7 @@
 	},
 	{
 		"id" : 183,
-		"first_name" : "DeAaron",
+		"first_name" : "De'Aaron",
 		"last_name" : "Fox",
 		"country" : "US",
 		"college" : "Kentucky",
@@ -3797,7 +3797,7 @@
 	},
 	{
 		"id" : 254,
-		"first_name" : "DeAndre",
+		"first_name" : "De'Andre",
 		"last_name" : "Hunter",
 		"country" : "US",
 		"college" : "Virginia",
@@ -5327,6 +5327,21 @@
 	},
 	{
 		"id" : 356,
+		"first_name" : "Alijah",
+		"last_name" : "Martin",
+		"country" : "US",
+		"college" : "Florida",
+		"position" : "SG",
+		"height" : "6-2",
+		"weight" : 210,
+		"jersey_number" : 55,
+		"draft_year" : 2025,
+		"draft_round" : 2,
+		"draft_number" : 9,
+		"team_id" : 5
+	},
+	{
+		"id" : 357,
 		"first_name" : "Caleb",
 		"last_name" : "Martin",
 		"country" : "US",
@@ -5341,7 +5356,7 @@
 		"team_id" : 26
 	},
 	{
-		"id" : 357,
+		"id" : 358,
 		"first_name" : "Cody",
 		"last_name" : "Martin",
 		"country" : "US",
@@ -5356,7 +5371,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 358,
+		"id" : 359,
 		"first_name" : "Jaylen",
 		"last_name" : "Martin",
 		"country" : "US",
@@ -5371,7 +5386,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 359,
+		"id" : 360,
 		"first_name" : "KJ",
 		"last_name" : "Martin",
 		"country" : "US",
@@ -5386,7 +5401,7 @@
 		"team_id" : 20
 	},
 	{
-		"id" : 360,
+		"id" : 361,
 		"first_name" : "Tyrese",
 		"last_name" : "Martin",
 		"country" : "US",
@@ -5401,7 +5416,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 361,
+		"id" : 362,
 		"first_name" : "Jahmai",
 		"last_name" : "Mashack",
 		"country" : "US",
@@ -5416,7 +5431,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 362,
+		"id" : 363,
 		"first_name" : "Garrison",
 		"last_name" : "Mathews",
 		"country" : "US",
@@ -5431,7 +5446,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 363,
+		"id" : 364,
 		"first_name" : "Bennedict",
 		"last_name" : "Mathurin",
 		"country" : "CA",
@@ -5446,7 +5461,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 364,
+		"id" : 365,
 		"first_name" : "Karlo",
 		"last_name" : "Matkovic",
 		"country" : "BA",
@@ -5461,7 +5476,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 365,
+		"id" : 366,
 		"first_name" : "Tyrese",
 		"last_name" : "Maxey",
 		"country" : "US",
@@ -5476,7 +5491,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 366,
+		"id" : 367,
 		"first_name" : "Miles",
 		"last_name" : "McBride",
 		"country" : "US",
@@ -5491,7 +5506,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 367,
+		"id" : 368,
 		"first_name" : "Jared",
 		"last_name" : "McCain",
 		"country" : "US",
@@ -5506,7 +5521,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 368,
+		"id" : 369,
 		"first_name" : "Mac",
 		"last_name" : "McClung",
 		"country" : "US",
@@ -5521,7 +5536,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 369,
+		"id" : 370,
 		"first_name" : "CJ",
 		"last_name" : "McCollum",
 		"country" : "US",
@@ -5536,7 +5551,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 370,
+		"id" : 371,
 		"first_name" : "T.J.",
 		"last_name" : "McConnell",
 		"country" : "US",
@@ -5551,7 +5566,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 371,
+		"id" : 372,
 		"first_name" : "Kevin",
 		"last_name" : "McCullar Jr.",
 		"country" : "US",
@@ -5566,7 +5581,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 372,
+		"id" : 373,
 		"first_name" : "Jaden",
 		"last_name" : "McDaniels",
 		"country" : "US",
@@ -5581,7 +5596,7 @@
 		"team_id" : 17
 	},
 	{
-		"id" : 373,
+		"id" : 374,
 		"first_name" : "Jalen",
 		"last_name" : "McDaniels",
 		"country" : "US",
@@ -5596,7 +5611,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 374,
+		"id" : 375,
 		"first_name" : "Doug",
 		"last_name" : "McDermott",
 		"country" : "US",
@@ -5611,7 +5626,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 375,
+		"id" : 376,
 		"first_name" : "Bryce",
 		"last_name" : "McGowens",
 		"country" : "US",
@@ -5626,7 +5641,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 376,
+		"id" : 377,
 		"first_name" : "Jordan",
 		"last_name" : "McLaughlin",
 		"country" : "US",
@@ -5641,7 +5656,7 @@
 		"team_id" : 30
 	},
 	{
-		"id" : 377,
+		"id" : 378,
 		"first_name" : "Liam",
 		"last_name" : "McNeeley",
 		"country" : "US",
@@ -5656,7 +5671,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 378,
+		"id" : 379,
 		"first_name" : "Jack",
 		"last_name" : "McVeigh",
 		"country" : "AU",
@@ -5671,8 +5686,8 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 379,
-		"first_name" : "DeAnthony",
+		"id" : 380,
+		"first_name" : "De'Anthony",
 		"last_name" : "Melton",
 		"country" : "US",
 		"college" : "USC",
@@ -5686,7 +5701,7 @@
 		"team_id" : 21
 	},
 	{
-		"id" : 380,
+		"id" : 381,
 		"first_name" : "Sam",
 		"last_name" : "Merrill",
 		"country" : "US",
@@ -5701,7 +5716,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 381,
+		"id" : 382,
 		"first_name" : "Vasilije",
 		"last_name" : "Micic",
 		"country" : "RS",
@@ -5716,7 +5731,7 @@
 		"team_id" : 24
 	},
 	{
-		"id" : 382,
+		"id" : 383,
 		"first_name" : "Khris",
 		"last_name" : "Middleton",
 		"country" : "US",
@@ -5731,7 +5746,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 383,
+		"id" : 384,
 		"first_name" : "Brandon",
 		"last_name" : "Miller",
 		"country" : "US",
@@ -5746,7 +5761,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 384,
+		"id" : 385,
 		"first_name" : "Emanuel",
 		"last_name" : "Miller",
 		"country" : "CA",
@@ -5761,7 +5776,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 385,
+		"id" : 386,
 		"first_name" : "Jordan",
 		"last_name" : "Miller",
 		"country" : "US",
@@ -5776,7 +5791,7 @@
 		"team_id" : 22
 	},
 	{
-		"id" : 386,
+		"id" : 387,
 		"first_name" : "Leonard",
 		"last_name" : "Miller",
 		"country" : "CA",
@@ -5791,7 +5806,7 @@
 		"team_id" : 17
 	},
 	{
-		"id" : 387,
+		"id" : 388,
 		"first_name" : "Dariq",
 		"last_name" : "Whitehead",
 		"country" : "US",
@@ -5806,7 +5821,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 388,
+		"id" : 389,
 		"first_name" : "Patty",
 		"last_name" : "Mills",
 		"country" : "AU",
@@ -5821,7 +5836,7 @@
 		"team_id" : 22
 	},
 	{
-		"id" : 389,
+		"id" : 390,
 		"first_name" : "Shake",
 		"last_name" : "Milton",
 		"country" : "US",
@@ -5836,7 +5851,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 390,
+		"id" : 391,
 		"first_name" : "Justin",
 		"last_name" : "Minaya",
 		"country" : "US",
@@ -5851,7 +5866,7 @@
 		"team_id" : 19
 	},
 	{
-		"id" : 391,
+		"id" : 392,
 		"first_name" : "Riley",
 		"last_name" : "Minix",
 		"country" : "US",
@@ -5866,7 +5881,7 @@
 		"team_id" : 30
 	},
 	{
-		"id" : 392,
+		"id" : 393,
 		"first_name" : "Josh",
 		"last_name" : "Minott",
 		"country" : "US",
@@ -5881,7 +5896,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 393,
+		"id" : 394,
 		"first_name" : "Yves",
 		"last_name" : "Missi",
 		"country" : "BE",
@@ -5896,7 +5911,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 394,
+		"id" : 395,
 		"first_name" : "Ajay",
 		"last_name" : "Mitchell",
 		"country" : "BE",
@@ -5911,7 +5926,7 @@
 		"team_id" : 18
 	},
 	{
-		"id" : 395,
+		"id" : 396,
 		"first_name" : "Davion",
 		"last_name" : "Mitchell",
 		"country" : "US",
@@ -5926,7 +5941,7 @@
 		"team_id" : 13
 	},
 	{
-		"id" : 396,
+		"id" : 397,
 		"first_name" : "Donovan",
 		"last_name" : "Mitchell",
 		"country" : "US",
@@ -5941,7 +5956,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 397,
+		"id" : 398,
 		"first_name" : "Evan",
 		"last_name" : "Mobley",
 		"country" : "US",
@@ -5956,7 +5971,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 398,
+		"id" : 399,
 		"first_name" : "Isaiah",
 		"last_name" : "Mobley",
 		"country" : "US",
@@ -5971,7 +5986,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 399,
+		"id" : 400,
 		"first_name" : "Jonathan",
 		"last_name" : "Mogbo",
 		"country" : "US",
@@ -5986,7 +6001,7 @@
 		"team_id" : 5
 	},
 	{
-		"id" : 400,
+		"id" : 401,
 		"first_name" : "Malik",
 		"last_name" : "Monk",
 		"country" : "US",
@@ -6001,7 +6016,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 401,
+		"id" : 402,
 		"first_name" : "Moses",
 		"last_name" : "Moody",
 		"country" : "US",
@@ -6016,7 +6031,7 @@
 		"team_id" : 21
 	},
 	{
-		"id" : 402,
+		"id" : 403,
 		"first_name" : "Taze",
 		"last_name" : "Moore",
 		"country" : "US",
@@ -6031,7 +6046,7 @@
 		"team_id" : 19
 	},
 	{
-		"id" : 403,
+		"id" : 404,
 		"first_name" : "Wendell",
 		"last_name" : "Moore Jr.",
 		"country" : "US",
@@ -6046,7 +6061,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 404,
+		"id" : 405,
 		"first_name" : "Ja",
 		"last_name" : "Morant",
 		"country" : "US",
@@ -6061,7 +6076,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 405,
+		"id" : 406,
 		"first_name" : "Markieff",
 		"last_name" : "Morris",
 		"country" : "US",
@@ -6076,7 +6091,7 @@
 		"team_id" : 26
 	},
 	{
-		"id" : 406,
+		"id" : 407,
 		"first_name" : "Monte",
 		"last_name" : "Morris",
 		"country" : "US",
@@ -6091,7 +6106,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 407,
+		"id" : 408,
 		"first_name" : "Trey",
 		"last_name" : "Murphy III",
 		"country" : "US",
@@ -6106,7 +6121,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 408,
+		"id" : 409,
 		"first_name" : "Dejounte",
 		"last_name" : "Murray",
 		"country" : "US",
@@ -6121,7 +6136,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 409,
+		"id" : 410,
 		"first_name" : "Jamal",
 		"last_name" : "Murray",
 		"country" : "CA",
@@ -6136,7 +6151,7 @@
 		"team_id" : 16
 	},
 	{
-		"id" : 410,
+		"id" : 411,
 		"first_name" : "Keegan",
 		"last_name" : "Murray",
 		"country" : "US",
@@ -6151,7 +6166,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 411,
+		"id" : 412,
 		"first_name" : "Kris",
 		"last_name" : "Murray",
 		"country" : "US",
@@ -6166,7 +6181,7 @@
 		"team_id" : 19
 	},
 	{
-		"id" : 412,
+		"id" : 413,
 		"first_name" : "Collin",
 		"last_name" : "Murray-Boyles",
 		"country" : "US",
@@ -6181,7 +6196,7 @@
 		"team_id" : 5
 	},
 	{
-		"id" : 413,
+		"id" : 414,
 		"first_name" : "Svi",
 		"last_name" : "Mykhailiuk",
 		"country" : "UA",
@@ -6196,7 +6211,7 @@
 		"team_id" : 20
 	},
 	{
-		"id" : 414,
+		"id" : 415,
 		"first_name" : "Larry",
 		"last_name" : "Nance Jr.",
 		"country" : "US",
@@ -6211,7 +6226,7 @@
 		"team_id" : 11
 	},
 	{
-		"id" : 415,
+		"id" : 416,
 		"first_name" : "Pete",
 		"last_name" : "Nance",
 		"country" : "US",
@@ -6226,7 +6241,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 416,
+		"id" : 417,
 		"first_name" : "Andrew",
 		"last_name" : "Nembhard",
 		"country" : "CA",
@@ -6241,7 +6256,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 417,
+		"id" : 418,
 		"first_name" : "Ryan",
 		"last_name" : "Nembhard",
 		"country" : "CA",
@@ -6256,7 +6271,7 @@
 		"team_id" : 26
 	},
 	{
-		"id" : 418,
+		"id" : 419,
 		"first_name" : "Aaron",
 		"last_name" : "Nesmith",
 		"country" : "US",
@@ -6271,7 +6286,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 419,
+		"id" : 420,
 		"first_name" : "Asa",
 		"last_name" : "Newell",
 		"country" : "US",
@@ -6286,7 +6301,7 @@
 		"team_id" : 11
 	},
 	{
-		"id" : 420,
+		"id" : 421,
 		"first_name" : "Tristen",
 		"last_name" : "Newton",
 		"country" : "US",
@@ -6301,7 +6316,7 @@
 		"team_id" : 17
 	},
 	{
-		"id" : 421,
+		"id" : 422,
 		"first_name" : "Georges",
 		"last_name" : "Niang",
 		"country" : "US",
@@ -6316,7 +6331,7 @@
 		"team_id" : 11
 	},
 	{
-		"id" : 422,
+		"id" : 423,
 		"first_name" : "Daishen",
 		"last_name" : "Nix",
 		"country" : "US",
@@ -6331,7 +6346,7 @@
 		"team_id" : 17
 	},
 	{
-		"id" : 423,
+		"id" : 424,
 		"first_name" : "Zeke",
 		"last_name" : "Nnaji",
 		"country" : "US",
@@ -6346,7 +6361,7 @@
 		"team_id" : 16
 	},
 	{
-		"id" : 424,
+		"id" : 425,
 		"first_name" : "Miles",
 		"last_name" : "Norris",
 		"country" : "US",
@@ -6361,7 +6376,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 425,
+		"id" : 426,
 		"first_name" : "Jaylen",
 		"last_name" : "Nowell",
 		"country" : "US",
@@ -6376,7 +6391,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 426,
+		"id" : 427,
 		"first_name" : "Jusuf",
 		"last_name" : "Nurkic",
 		"country" : "BA",
@@ -6391,9 +6406,9 @@
 		"team_id" : 20
 	},
 	{
-		"id" : 427,
+		"id" : 428,
 		"first_name" : "Royce",
-		"last_name" : "ONeale",
+		"last_name" : "O'Neale",
 		"country" : "US",
 		"college" : "Baylor",
 		"position" : "SF",
@@ -6406,7 +6421,7 @@
 		"team_id" : 24
 	},
 	{
-		"id" : 428,
+		"id" : 429,
 		"first_name" : "Jahlil",
 		"last_name" : "Okafor",
 		"country" : "US",
@@ -6421,7 +6436,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 429,
+		"id" : 430,
 		"first_name" : "Chuma",
 		"last_name" : "Okeke",
 		"country" : "US",
@@ -6436,7 +6451,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 430,
+		"id" : 431,
 		"first_name" : "Josh",
 		"last_name" : "Okogie",
 		"country" : "NG",
@@ -6451,7 +6466,7 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 431,
+		"id" : 432,
 		"first_name" : "Onyeka",
 		"last_name" : "Okongwu",
 		"country" : "US",
@@ -6466,7 +6481,7 @@
 		"team_id" : 11
 	},
 	{
-		"id" : 432,
+		"id" : 433,
 		"first_name" : "Isaac",
 		"last_name" : "Okoro",
 		"country" : "US",
@@ -6481,7 +6496,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 433,
+		"id" : 434,
 		"first_name" : "Lachlan",
 		"last_name" : "Olbrich",
 		"country" : "AU",
@@ -6496,7 +6511,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 434,
+		"id" : 435,
 		"first_name" : "Quincy",
 		"last_name" : "Olivari",
 		"country" : "US",
@@ -6511,7 +6526,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 435,
+		"id" : 436,
 		"first_name" : "Kelly",
 		"last_name" : "Olynyk",
 		"country" : "CA",
@@ -6526,7 +6541,7 @@
 		"team_id" : 30
 	},
 	{
-		"id" : 436,
+		"id" : 437,
 		"first_name" : "Eugene",
 		"last_name" : "Omoruyi",
 		"country" : "NG",
@@ -6541,7 +6556,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 437,
+		"id" : 438,
 		"first_name" : "Kelly",
 		"last_name" : "Oubre Jr.",
 		"country" : "US",
@@ -6556,7 +6571,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 438,
+		"id" : 439,
 		"first_name" : "Chris",
 		"last_name" : "Paul",
 		"country" : "US",
@@ -6571,7 +6586,7 @@
 		"team_id" : 30
 	},
 	{
-		"id" : 439,
+		"id" : 440,
 		"first_name" : "Cameron",
 		"last_name" : "Payne",
 		"country" : "US",
@@ -6586,7 +6601,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 440,
+		"id" : 441,
 		"first_name" : "Elfrid",
 		"last_name" : "Payton",
 		"country" : "US",
@@ -6601,7 +6616,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 441,
+		"id" : 442,
 		"first_name" : "Gary",
 		"last_name" : "Payton II",
 		"country" : "US",
@@ -6616,7 +6631,7 @@
 		"team_id" : 21
 	},
 	{
-		"id" : 442,
+		"id" : 443,
 		"first_name" : "Micah",
 		"last_name" : "Peavy",
 		"country" : "US",
@@ -6631,7 +6646,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 443,
+		"id" : 444,
 		"first_name" : "Noah",
 		"last_name" : "Penda",
 		"country" : "FR",
@@ -6646,7 +6661,7 @@
 		"team_id" : 14
 	},
 	{
-		"id" : 444,
+		"id" : 445,
 		"first_name" : "Taelon",
 		"last_name" : "Peter",
 		"country" : "US",
@@ -6661,7 +6676,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 445,
+		"id" : 446,
 		"first_name" : "Drew",
 		"last_name" : "Peterson",
 		"country" : "US",
@@ -6676,7 +6691,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 446,
+		"id" : 447,
 		"first_name" : "Julian",
 		"last_name" : "Phillips",
 		"country" : "US",
@@ -6691,7 +6706,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 447,
+		"id" : 448,
 		"first_name" : "Jalen",
 		"last_name" : "Pickett",
 		"country" : "US",
@@ -6706,7 +6721,7 @@
 		"team_id" : 16
 	},
 	{
-		"id" : 448,
+		"id" : 449,
 		"first_name" : "Scotty",
 		"last_name" : "Pippen Jr.",
 		"country" : "US",
@@ -6721,7 +6736,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 449,
+		"id" : 450,
 		"first_name" : "Daeqwon",
 		"last_name" : "Plowden",
 		"country" : "US",
@@ -6736,7 +6751,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 450,
+		"id" : 451,
 		"first_name" : "Mason",
 		"last_name" : "Plumlee",
 		"country" : "US",
@@ -6751,7 +6766,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 451,
+		"id" : 452,
 		"first_name" : "Brandin",
 		"last_name" : "Podziemski",
 		"country" : "US",
@@ -6766,7 +6781,7 @@
 		"team_id" : 21
 	},
 	{
-		"id" : 452,
+		"id" : 453,
 		"first_name" : "Jakob",
 		"last_name" : "Poeltl",
 		"country" : "AT",
@@ -6781,7 +6796,7 @@
 		"team_id" : 5
 	},
 	{
-		"id" : 453,
+		"id" : 454,
 		"first_name" : "Jordan",
 		"last_name" : "Poole",
 		"country" : "US",
@@ -6796,7 +6811,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 454,
+		"id" : 455,
 		"first_name" : "Craig",
 		"last_name" : "Porter Jr.",
 		"country" : "US",
@@ -6811,7 +6826,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 455,
+		"id" : 456,
 		"first_name" : "Kevin",
 		"last_name" : "Porter Jr.",
 		"country" : "US",
@@ -6826,7 +6841,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 456,
+		"id" : 457,
 		"first_name" : "Michael",
 		"last_name" : "Porter Jr.",
 		"country" : "US",
@@ -6841,7 +6856,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 457,
+		"id" : 458,
 		"first_name" : "Bobby",
 		"last_name" : "Portis",
 		"country" : "US",
@@ -6856,7 +6871,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 458,
+		"id" : 459,
 		"first_name" : "Kristaps",
 		"last_name" : "Porzingis",
 		"country" : "LV",
@@ -6871,7 +6886,7 @@
 		"team_id" : 11
 	},
 	{
-		"id" : 459,
+		"id" : 460,
 		"first_name" : "Quinten",
 		"last_name" : "Post",
 		"country" : "NL",
@@ -6886,7 +6901,7 @@
 		"team_id" : 21
 	},
 	{
-		"id" : 460,
+		"id" : 461,
 		"first_name" : "Micah",
 		"last_name" : "Potter",
 		"country" : "US",
@@ -6901,7 +6916,7 @@
 		"team_id" : 20
 	},
 	{
-		"id" : 461,
+		"id" : 462,
 		"first_name" : "Drake",
 		"last_name" : "Powell",
 		"country" : "US",
@@ -6916,7 +6931,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 462,
+		"id" : 463,
 		"first_name" : "Dwight",
 		"last_name" : "Powell",
 		"country" : "CA",
@@ -6931,7 +6946,7 @@
 		"team_id" : 26
 	},
 	{
-		"id" : 463,
+		"id" : 464,
 		"first_name" : "Norman",
 		"last_name" : "Powell",
 		"country" : "US",
@@ -6946,7 +6961,7 @@
 		"team_id" : 13
 	},
 	{
-		"id" : 464,
+		"id" : 465,
 		"first_name" : "Jason",
 		"last_name" : "Preston",
 		"country" : "US",
@@ -6961,7 +6976,7 @@
 		"team_id" : 20
 	},
 	{
-		"id" : 465,
+		"id" : 466,
 		"first_name" : "Taurean",
 		"last_name" : "Prince",
 		"country" : "US",
@@ -6976,7 +6991,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 466,
+		"id" : 467,
 		"first_name" : "Payton",
 		"last_name" : "Pritchard",
 		"country" : "US",
@@ -6991,7 +7006,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 467,
+		"id" : 468,
 		"first_name" : "Tyrese",
 		"last_name" : "Proctor",
 		"country" : "AU",
@@ -7006,7 +7021,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 468,
+		"id" : 469,
 		"first_name" : "Olivier-Maxence",
 		"last_name" : "Prosper",
 		"country" : "CA",
@@ -7021,7 +7036,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 469,
+		"id" : 470,
 		"first_name" : "Zyon",
 		"last_name" : "Pullin",
 		"country" : "US",
@@ -7036,7 +7051,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 470,
+		"id" : 471,
 		"first_name" : "Derik",
 		"last_name" : "Queen",
 		"country" : "US",
@@ -7051,7 +7066,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 471,
+		"id" : 472,
 		"first_name" : "Trevelin",
 		"last_name" : "Queen",
 		"country" : "US",
@@ -7066,7 +7081,7 @@
 		"team_id" : 14
 	},
 	{
-		"id" : 472,
+		"id" : 473,
 		"first_name" : "Neemias",
 		"last_name" : "Queta",
 		"country" : "PT",
@@ -7081,7 +7096,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 473,
+		"id" : 474,
 		"first_name" : "Immanuel",
 		"last_name" : "Quickley",
 		"country" : "US",
@@ -7096,7 +7111,7 @@
 		"team_id" : 5
 	},
 	{
-		"id" : 474,
+		"id" : 475,
 		"first_name" : "Lester",
 		"last_name" : "Quinones",
 		"country" : "US",
@@ -7111,7 +7126,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 475,
+		"id" : 476,
 		"first_name" : "Julius",
 		"last_name" : "Randle",
 		"country" : "US",
@@ -7126,7 +7141,7 @@
 		"team_id" : 17
 	},
 	{
-		"id" : 476,
+		"id" : 477,
 		"first_name" : "Maxime",
 		"last_name" : "Raynaud",
 		"country" : "FR",
@@ -7141,7 +7156,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 477,
+		"id" : 478,
 		"first_name" : "Duop",
 		"last_name" : "Reath",
 		"country" : "SS",
@@ -7156,7 +7171,7 @@
 		"team_id" : 19
 	},
 	{
-		"id" : 478,
+		"id" : 479,
 		"first_name" : "Austin",
 		"last_name" : "Reaves",
 		"country" : "US",
@@ -7171,7 +7186,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 479,
+		"id" : 480,
 		"first_name" : "Cam",
 		"last_name" : "Reddish",
 		"country" : "US",
@@ -7186,7 +7201,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 480,
+		"id" : 481,
 		"first_name" : "Paul",
 		"last_name" : "Reed",
 		"country" : "US",
@@ -7201,7 +7216,7 @@
 		"team_id" : 8
 	},
 	{
-		"id" : 481,
+		"id" : 482,
 		"first_name" : "Alex",
 		"last_name" : "Reese",
 		"country" : "US",
@@ -7216,7 +7231,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 482,
+		"id" : 483,
 		"first_name" : "Antonio",
 		"last_name" : "Reeves",
 		"country" : "US",
@@ -7231,7 +7246,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 483,
+		"id" : 484,
 		"first_name" : "Naz",
 		"last_name" : "Reid",
 		"country" : "US",
@@ -7246,7 +7261,7 @@
 		"team_id" : 17
 	},
 	{
-		"id" : 484,
+		"id" : 485,
 		"first_name" : "Jared",
 		"last_name" : "Rhoden",
 		"country" : "US",
@@ -7261,7 +7276,7 @@
 		"team_id" : 5
 	},
 	{
-		"id" : 485,
+		"id" : 486,
 		"first_name" : "Will",
 		"last_name" : "Richard",
 		"country" : "US",
@@ -7276,7 +7291,7 @@
 		"team_id" : 21
 	},
 	{
-		"id" : 486,
+		"id" : 487,
 		"first_name" : "Nick",
 		"last_name" : "Richards",
 		"country" : "JM",
@@ -7291,7 +7306,7 @@
 		"team_id" : 24
 	},
 	{
-		"id" : 487,
+		"id" : 488,
 		"first_name" : "Jase",
 		"last_name" : "Richardson",
 		"country" : "US",
@@ -7306,7 +7321,7 @@
 		"team_id" : 14
 	},
 	{
-		"id" : 488,
+		"id" : 489,
 		"first_name" : "Josh",
 		"last_name" : "Richardson",
 		"country" : "US",
@@ -7321,7 +7336,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 489,
+		"id" : 490,
 		"first_name" : "Will",
 		"last_name" : "Riley",
 		"country" : "CA",
@@ -7336,7 +7351,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 490,
+		"id" : 491,
 		"first_name" : "Zaccharie",
 		"last_name" : "Risacher",
 		"country" : "ES",
@@ -7351,7 +7366,7 @@
 		"team_id" : 11
 	},
 	{
-		"id" : 491,
+		"id" : 492,
 		"first_name" : "Liam",
 		"last_name" : "Robbins",
 		"country" : "US",
@@ -7366,7 +7381,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 492,
+		"id" : 493,
 		"first_name" : "Duncan",
 		"last_name" : "Robinson",
 		"country" : "US",
@@ -7381,7 +7396,7 @@
 		"team_id" : 8
 	},
 	{
-		"id" : 493,
+		"id" : 494,
 		"first_name" : "Mitchell",
 		"last_name" : "Robinson",
 		"country" : "US",
@@ -7396,7 +7411,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 494,
+		"id" : 495,
 		"first_name" : "Orlando",
 		"last_name" : "Robinson",
 		"country" : "US",
@@ -7411,7 +7426,7 @@
 		"team_id" : 14
 	},
 	{
-		"id" : 495,
+		"id" : 496,
 		"first_name" : "Jeremiah",
 		"last_name" : "Robinson-Earl",
 		"country" : "US",
@@ -7426,7 +7441,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 496,
+		"id" : 497,
 		"first_name" : "David",
 		"last_name" : "Roddy",
 		"country" : "US",
@@ -7441,7 +7456,7 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 497,
+		"id" : 498,
 		"first_name" : "Ryan",
 		"last_name" : "Rollins",
 		"country" : "US",
@@ -7456,7 +7471,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 498,
+		"id" : 499,
 		"first_name" : "Jackson",
 		"last_name" : "Rowe",
 		"country" : "CA",
@@ -7471,7 +7486,7 @@
 		"team_id" : 21
 	},
 	{
-		"id" : 499,
+		"id" : 500,
 		"first_name" : "Terry",
 		"last_name" : "Rozier",
 		"country" : "US",
@@ -7486,7 +7501,7 @@
 		"team_id" : 13
 	},
 	{
-		"id" : 500,
+		"id" : 501,
 		"first_name" : "Rayan",
 		"last_name" : "Rupert",
 		"country" : "FR",
@@ -7501,8 +7516,8 @@
 		"team_id" : 19
 	},
 	{
-		"id" : 501,
-		"first_name" : "DAngelo",
+		"id" : 502,
+		"first_name" : "D'Angelo",
 		"last_name" : "Russell",
 		"country" : "US",
 		"college" : "Ohio State",
@@ -7516,7 +7531,7 @@
 		"team_id" : 26
 	},
 	{
-		"id" : 502,
+		"id" : 503,
 		"first_name" : "Matt",
 		"last_name" : "Ryan",
 		"country" : "US",
@@ -7531,7 +7546,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 503,
+		"id" : 504,
 		"first_name" : "Domantas",
 		"last_name" : "Sabonis",
 		"country" : "US",
@@ -7546,7 +7561,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 504,
+		"id" : 505,
 		"first_name" : "Tidjane",
 		"last_name" : "Salaun",
 		"country" : "FR",
@@ -7561,7 +7576,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 505,
+		"id" : 506,
 		"first_name" : "Hunter",
 		"last_name" : "Sallis",
 		"country" : "US",
@@ -7576,7 +7591,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 506,
+		"id" : 507,
 		"first_name" : "Kobe",
 		"last_name" : "Sanders",
 		"country" : "US",
@@ -7591,7 +7606,7 @@
 		"team_id" : 22
 	},
 	{
-		"id" : 507,
+		"id" : 508,
 		"first_name" : "Adama",
 		"last_name" : "Sanogo",
 		"country" : "ML",
@@ -7606,7 +7621,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 508,
+		"id" : 509,
 		"first_name" : "Gui",
 		"last_name" : "Santos",
 		"country" : "BR",
@@ -7621,7 +7636,7 @@
 		"team_id" : 21
 	},
 	{
-		"id" : 509,
+		"id" : 510,
 		"first_name" : "Ben",
 		"last_name" : "Saraf",
 		"country" : "ZA",
@@ -7636,7 +7651,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 510,
+		"id" : 511,
 		"first_name" : "Dario",
 		"last_name" : "Saric",
 		"country" : "HR",
@@ -7651,7 +7666,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 511,
+		"id" : 512,
 		"first_name" : "Alex",
 		"last_name" : "Sarr",
 		"country" : "FR",
@@ -7666,7 +7681,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 512,
+		"id" : 513,
 		"first_name" : "Marcus",
 		"last_name" : "Sasser",
 		"country" : "US",
@@ -7681,7 +7696,7 @@
 		"team_id" : 8
 	},
 	{
-		"id" : 513,
+		"id" : 514,
 		"first_name" : "Baylor",
 		"last_name" : "Scheierman",
 		"country" : "US",
@@ -7696,7 +7711,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 514,
+		"id" : 515,
 		"first_name" : "Dennis",
 		"last_name" : "Schroder",
 		"country" : "DE",
@@ -7711,7 +7726,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 515,
+		"id" : 516,
 		"first_name" : "Mark",
 		"last_name" : "Sears",
 		"country" : "US",
@@ -7726,7 +7741,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 516,
+		"id" : 517,
 		"first_name" : "Alperen",
 		"last_name" : "Sengun",
 		"country" : "TR",
@@ -7741,7 +7756,7 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 517,
+		"id" : 518,
 		"first_name" : "Brice",
 		"last_name" : "Sensabaugh",
 		"country" : "US",
@@ -7756,7 +7771,7 @@
 		"team_id" : 20
 	},
 	{
-		"id" : 518,
+		"id" : 519,
 		"first_name" : "Collin",
 		"last_name" : "Sexton",
 		"country" : "US",
@@ -7771,7 +7786,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 519,
+		"id" : 520,
 		"first_name" : "Landry",
 		"last_name" : "Shamet",
 		"country" : "US",
@@ -7786,7 +7801,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 520,
+		"id" : 521,
 		"first_name" : "Terrence",
 		"last_name" : "Shannon Jr.",
 		"country" : "US",
@@ -7801,8 +7816,8 @@
 		"team_id" : 17
 	},
 	{
-		"id" : 521,
-		"first_name" : "DayRon",
+		"id" : 522,
+		"first_name" : "Day'Ron",
 		"last_name" : "Sharpe",
 		"country" : "US",
 		"college" : "UNC",
@@ -7816,7 +7831,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 522,
+		"id" : 523,
 		"first_name" : "Shaedon",
 		"last_name" : "Sharpe",
 		"country" : "CA",
@@ -7831,7 +7846,7 @@
 		"team_id" : 19
 	},
 	{
-		"id" : 523,
+		"id" : 524,
 		"first_name" : "Jamal",
 		"last_name" : "Shead",
 		"country" : "US",
@@ -7846,7 +7861,7 @@
 		"team_id" : 5
 	},
 	{
-		"id" : 524,
+		"id" : 525,
 		"first_name" : "Ben",
 		"last_name" : "Sheppard",
 		"country" : "US",
@@ -7861,7 +7876,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 525,
+		"id" : 526,
 		"first_name" : "Reed",
 		"last_name" : "Sheppard",
 		"country" : "US",
@@ -7876,7 +7891,7 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 526,
+		"id" : 527,
 		"first_name" : "Pascal",
 		"last_name" : "Siakam",
 		"country" : "CM",
@@ -7891,7 +7906,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 527,
+		"id" : 528,
 		"first_name" : "Ben",
 		"last_name" : "Simmons",
 		"country" : "AU",
@@ -7906,7 +7921,7 @@
 		"team_id" : 22
 	},
 	{
-		"id" : 528,
+		"id" : 529,
 		"first_name" : "Anfernee",
 		"last_name" : "Simons",
 		"country" : "US",
@@ -7921,7 +7936,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 529,
+		"id" : 530,
 		"first_name" : "KJ",
 		"last_name" : "Simpson",
 		"country" : "US",
@@ -7936,7 +7951,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 530,
+		"id" : 531,
 		"first_name" : "Jaylen",
 		"last_name" : "Sims",
 		"country" : "US",
@@ -7951,7 +7966,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 531,
+		"id" : 532,
 		"first_name" : "Jericho",
 		"last_name" : "Sims",
 		"country" : "US",
@@ -7966,7 +7981,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 532,
+		"id" : 533,
 		"first_name" : "Javon",
 		"last_name" : "Small",
 		"country" : "US",
@@ -7981,7 +7996,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 533,
+		"id" : 534,
 		"first_name" : "Marcus",
 		"last_name" : "Smart",
 		"country" : "US",
@@ -7996,7 +8011,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 534,
+		"id" : 535,
 		"first_name" : "Dru",
 		"last_name" : "Smith",
 		"country" : "US",
@@ -8011,7 +8026,7 @@
 		"team_id" : 13
 	},
 	{
-		"id" : 535,
+		"id" : 536,
 		"first_name" : "Jabari",
 		"last_name" : "Smith Jr.",
 		"country" : "US",
@@ -8026,7 +8041,7 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 536,
+		"id" : 537,
 		"first_name" : "Jalen",
 		"last_name" : "Smith",
 		"country" : "US",
@@ -8041,7 +8056,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 537,
+		"id" : 538,
 		"first_name" : "Nick",
 		"last_name" : "Smith Jr.",
 		"country" : "US",
@@ -8056,7 +8071,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 538,
+		"id" : 539,
 		"first_name" : "Tolu",
 		"last_name" : "Smith",
 		"country" : "US",
@@ -8071,7 +8086,7 @@
 		"team_id" : 8
 	},
 	{
-		"id" : 539,
+		"id" : 540,
 		"first_name" : "Tyler",
 		"last_name" : "Smith",
 		"country" : "US",
@@ -8086,7 +8101,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 540,
+		"id" : 541,
 		"first_name" : "Jeremy",
 		"last_name" : "Sochan",
 		"country" : "US",
@@ -8101,7 +8116,7 @@
 		"team_id" : 30
 	},
 	{
-		"id" : 541,
+		"id" : 542,
 		"first_name" : "Cam",
 		"last_name" : "Spencer",
 		"country" : "US",
@@ -8116,7 +8131,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 542,
+		"id" : 543,
 		"first_name" : "Pat",
 		"last_name" : "Spencer",
 		"country" : "US",
@@ -8131,7 +8146,7 @@
 		"team_id" : 21
 	},
 	{
-		"id" : 543,
+		"id" : 544,
 		"first_name" : "Jaden",
 		"last_name" : "Springer",
 		"country" : "US",
@@ -8146,7 +8161,7 @@
 		"team_id" : 20
 	},
 	{
-		"id" : 544,
+		"id" : 545,
 		"first_name" : "Isaiah",
 		"last_name" : "Stevens",
 		"country" : "US",
@@ -8161,7 +8176,7 @@
 		"team_id" : 13
 	},
 	{
-		"id" : 545,
+		"id" : 546,
 		"first_name" : "Lamar",
 		"last_name" : "Stevens",
 		"country" : "US",
@@ -8176,7 +8191,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 546,
+		"id" : 547,
 		"first_name" : "Isaiah",
 		"last_name" : "Stewart",
 		"country" : "US",
@@ -8191,7 +8206,7 @@
 		"team_id" : 8
 	},
 	{
-		"id" : 547,
+		"id" : 548,
 		"first_name" : "Julian",
 		"last_name" : "Strawther",
 		"country" : "US",
@@ -8206,7 +8221,7 @@
 		"team_id" : 16
 	},
 	{
-		"id" : 548,
+		"id" : 549,
 		"first_name" : "Max",
 		"last_name" : "Strus",
 		"country" : "US",
@@ -8221,7 +8236,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 549,
+		"id" : 550,
 		"first_name" : "Jalen",
 		"last_name" : "Suggs",
 		"country" : "US",
@@ -8236,7 +8251,7 @@
 		"team_id" : 14
 	},
 	{
-		"id" : 550,
+		"id" : 551,
 		"first_name" : "Cole",
 		"last_name" : "Swider",
 		"country" : "US",
@@ -8251,8 +8266,8 @@
 		"team_id" : 5
 	},
 	{
-		"id" : 551,
-		"first_name" : "JaeSean",
+		"id" : 552,
+		"first_name" : "Jae'Sean",
 		"last_name" : "Tate",
 		"country" : "US",
 		"college" : "Ohio State",
@@ -8266,7 +8281,7 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 552,
+		"id" : 553,
 		"first_name" : "Jayson",
 		"last_name" : "Tatum",
 		"country" : "US",
@@ -8281,7 +8296,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 553,
+		"id" : 554,
 		"first_name" : "Terry",
 		"last_name" : "Taylor",
 		"country" : "US",
@@ -8296,7 +8311,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 554,
+		"id" : 555,
 		"first_name" : "Jahmyl",
 		"last_name" : "Telfort",
 		"country" : "CA",
@@ -8311,7 +8326,7 @@
 		"team_id" : 22
 	},
 	{
-		"id" : 555,
+		"id" : 556,
 		"first_name" : "Garrett",
 		"last_name" : "Temple",
 		"country" : "US",
@@ -8326,7 +8341,7 @@
 		"team_id" : 5
 	},
 	{
-		"id" : 556,
+		"id" : 557,
 		"first_name" : "Dalen",
 		"last_name" : "Terry",
 		"country" : "US",
@@ -8341,7 +8356,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 557,
+		"id" : 558,
 		"first_name" : "Daniel",
 		"last_name" : "Theis",
 		"country" : "DE",
@@ -8356,7 +8371,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 558,
+		"id" : 559,
 		"first_name" : "Adou",
 		"last_name" : "Thiero",
 		"country" : "US",
@@ -8371,7 +8386,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 559,
+		"id" : 560,
 		"first_name" : "Cam",
 		"last_name" : "Thomas",
 		"country" : "JP",
@@ -8386,7 +8401,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 560,
+		"id" : 561,
 		"first_name" : "Amen",
 		"last_name" : "Thompson",
 		"country" : "US",
@@ -8401,7 +8416,7 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 561,
+		"id" : 562,
 		"first_name" : "Ausar",
 		"last_name" : "Thompson",
 		"country" : "US",
@@ -8416,7 +8431,7 @@
 		"team_id" : 8
 	},
 	{
-		"id" : 562,
+		"id" : 563,
 		"first_name" : "Ethan",
 		"last_name" : "Thompson",
 		"country" : "US",
@@ -8431,7 +8446,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 563,
+		"id" : 564,
 		"first_name" : "Klay",
 		"last_name" : "Thompson",
 		"country" : "US",
@@ -8446,7 +8461,7 @@
 		"team_id" : 26
 	},
 	{
-		"id" : 564,
+		"id" : 565,
 		"first_name" : "Tristan",
 		"last_name" : "Thompson",
 		"country" : "CA",
@@ -8461,7 +8476,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 565,
+		"id" : 566,
 		"first_name" : "JT",
 		"last_name" : "Thor",
 		"country" : "US",
@@ -8476,7 +8491,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 566,
+		"id" : 567,
 		"first_name" : "Matisse",
 		"last_name" : "Thybulle",
 		"country" : "US",
@@ -8491,7 +8506,7 @@
 		"team_id" : 19
 	},
 	{
-		"id" : 567,
+		"id" : 568,
 		"first_name" : "Xavier",
 		"last_name" : "Tillman Sr.",
 		"country" : "US",
@@ -8506,7 +8521,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 568,
+		"id" : 569,
 		"first_name" : "Drew",
 		"last_name" : "Timme",
 		"country" : "US",
@@ -8521,8 +8536,8 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 569,
-		"first_name" : "NaeQwan",
+		"id" : 570,
+		"first_name" : "Nae'Qwan",
 		"last_name" : "Tomlin",
 		"country" : "US",
 		"college" : "Memphis",
@@ -8536,7 +8551,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 570,
+		"id" : 571,
 		"first_name" : "Jacob",
 		"last_name" : "Toppin",
 		"country" : "US",
@@ -8551,7 +8566,7 @@
 		"team_id" : 11
 	},
 	{
-		"id" : 571,
+		"id" : 572,
 		"first_name" : "Obi",
 		"last_name" : "Toppin",
 		"country" : "US",
@@ -8566,7 +8581,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 572,
+		"id" : 573,
 		"first_name" : "Karl-Anthony",
 		"last_name" : "Towns",
 		"country" : "US",
@@ -8581,7 +8596,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 573,
+		"id" : 574,
 		"first_name" : "Armel",
 		"last_name" : "Traore",
 		"country" : "FR",
@@ -8596,7 +8611,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 574,
+		"id" : 575,
 		"first_name" : "Nolan",
 		"last_name" : "Traore",
 		"country" : "FR",
@@ -8611,7 +8626,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 575,
+		"id" : 576,
 		"first_name" : "Luke",
 		"last_name" : "Travers",
 		"country" : "AU",
@@ -8626,7 +8641,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 576,
+		"id" : 577,
 		"first_name" : "Gary",
 		"last_name" : "Trent Jr.",
 		"country" : "US",
@@ -8641,7 +8656,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 577,
+		"id" : 578,
 		"first_name" : "Oscar",
 		"last_name" : "Tshiebwe",
 		"country" : "CD",
@@ -8656,7 +8671,7 @@
 		"team_id" : 20
 	},
 	{
-		"id" : 578,
+		"id" : 579,
 		"first_name" : "P.J.",
 		"last_name" : "Tucker",
 		"country" : "US",
@@ -8671,7 +8686,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 579,
+		"id" : 580,
 		"first_name" : "Myles",
 		"last_name" : "Turner",
 		"country" : "US",
@@ -8686,7 +8701,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 580,
+		"id" : 581,
 		"first_name" : "Hunter",
 		"last_name" : "Tyson",
 		"country" : "US",
@@ -8701,7 +8716,7 @@
 		"team_id" : 16
 	},
 	{
-		"id" : 581,
+		"id" : 582,
 		"first_name" : "Jaylon",
 		"last_name" : "Tyson",
 		"country" : "US",
@@ -8716,7 +8731,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 582,
+		"id" : 583,
 		"first_name" : "Stanley",
 		"last_name" : "Umude",
 		"country" : "US",
@@ -8731,7 +8746,7 @@
 		"team_id" : 10
 	},
 	{
-		"id" : 583,
+		"id" : 584,
 		"first_name" : "Jonas",
 		"last_name" : "Valanciunas",
 		"country" : "LT",
@@ -8746,7 +8761,7 @@
 		"team_id" : 16
 	},
 	{
-		"id" : 584,
+		"id" : 585,
 		"first_name" : "Fred",
 		"last_name" : "VanVleet",
 		"country" : "US",
@@ -8761,7 +8776,7 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 585,
+		"id" : 586,
 		"first_name" : "Jarred",
 		"last_name" : "Vanderbilt",
 		"country" : "US",
@@ -8776,7 +8791,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 586,
+		"id" : 587,
 		"first_name" : "Devin",
 		"last_name" : "Vassell",
 		"country" : "US",
@@ -8791,7 +8806,7 @@
 		"team_id" : 30
 	},
 	{
-		"id" : 587,
+		"id" : 588,
 		"first_name" : "Gabe",
 		"last_name" : "Vincent",
 		"country" : "US",
@@ -8806,7 +8821,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 588,
+		"id" : 589,
 		"first_name" : "Nikola",
 		"last_name" : "Vucevic",
 		"country" : "CH",
@@ -8821,7 +8836,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 589,
+		"id" : 590,
 		"first_name" : "Tristan",
 		"last_name" : "Vukcevic",
 		"country" : "IT",
@@ -8836,7 +8851,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 590,
+		"id" : 591,
 		"first_name" : "Dean",
 		"last_name" : "Wade",
 		"country" : "US",
@@ -8851,7 +8866,7 @@
 		"team_id" : 7
 	},
 	{
-		"id" : 591,
+		"id" : 592,
 		"first_name" : "Franz",
 		"last_name" : "Wagner",
 		"country" : "DE",
@@ -8866,7 +8881,7 @@
 		"team_id" : 14
 	},
 	{
-		"id" : 592,
+		"id" : 593,
 		"first_name" : "Moritz",
 		"last_name" : "Wagner",
 		"country" : "DE",
@@ -8881,7 +8896,7 @@
 		"team_id" : 14
 	},
 	{
-		"id" : 593,
+		"id" : 594,
 		"first_name" : "Jabari",
 		"last_name" : "Walker",
 		"country" : "US",
@@ -8896,7 +8911,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 594,
+		"id" : 595,
 		"first_name" : "Jarace",
 		"last_name" : "Walker",
 		"country" : "US",
@@ -8911,7 +8926,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 595,
+		"id" : 596,
 		"first_name" : "Lonnie",
 		"last_name" : "Walker IV",
 		"country" : "US",
@@ -8926,7 +8941,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 596,
+		"id" : 597,
 		"first_name" : "Cason",
 		"last_name" : "Wallace",
 		"country" : "US",
@@ -8941,7 +8956,7 @@
 		"team_id" : 18
 	},
 	{
-		"id" : 597,
+		"id" : 598,
 		"first_name" : "Keaton",
 		"last_name" : "Wallace",
 		"country" : "US",
@@ -8956,7 +8971,7 @@
 		"team_id" : 11
 	},
 	{
-		"id" : 598,
+		"id" : 599,
 		"first_name" : "Jordan",
 		"last_name" : "Walsh",
 		"country" : "US",
@@ -8971,8 +8986,8 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 599,
-		"first_name" : "JaKobe",
+		"id" : 600,
+		"first_name" : "Ja'Kobe",
 		"last_name" : "Walter",
 		"country" : "US",
 		"college" : "Baylor",
@@ -8986,8 +9001,8 @@
 		"team_id" : 5
 	},
 	{
-		"id" : 600,
-		"first_name" : "Kelel",
+		"id" : 601,
+		"first_name" : "Kel'el",
 		"last_name" : "Ware",
 		"country" : "US",
 		"college" : "Indiana",
@@ -9001,7 +9016,7 @@
 		"team_id" : 13
 	},
 	{
-		"id" : 601,
+		"id" : 602,
 		"first_name" : "P.J.",
 		"last_name" : "Washington",
 		"country" : "US",
@@ -9016,7 +9031,7 @@
 		"team_id" : 26
 	},
 	{
-		"id" : 602,
+		"id" : 603,
 		"first_name" : "TyTy",
 		"last_name" : "Washington Jr.",
 		"country" : "US",
@@ -9031,7 +9046,7 @@
 		"team_id" : 24
 	},
 	{
-		"id" : 603,
+		"id" : 604,
 		"first_name" : "Lindy",
 		"last_name" : "Waters III",
 		"country" : "US",
@@ -9046,7 +9061,7 @@
 		"team_id" : 30
 	},
 	{
-		"id" : 604,
+		"id" : 605,
 		"first_name" : "Trendon",
 		"last_name" : "Watford",
 		"country" : "US",
@@ -9061,7 +9076,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 605,
+		"id" : 606,
 		"first_name" : "Jamir",
 		"last_name" : "Watkins",
 		"country" : "US",
@@ -9076,7 +9091,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 606,
+		"id" : 607,
 		"first_name" : "Anton",
 		"last_name" : "Watson",
 		"country" : "US",
@@ -9091,7 +9106,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 607,
+		"id" : 608,
 		"first_name" : "Peyton",
 		"last_name" : "Watson",
 		"country" : "US",
@@ -9106,7 +9121,7 @@
 		"team_id" : 16
 	},
 	{
-		"id" : 608,
+		"id" : 609,
 		"first_name" : "Jaylen",
 		"last_name" : "Wells",
 		"country" : "US",
@@ -9121,7 +9136,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 609,
+		"id" : 610,
 		"first_name" : "Victor",
 		"last_name" : "Wembanyama",
 		"country" : "FR",
@@ -9136,7 +9151,7 @@
 		"team_id" : 30
 	},
 	{
-		"id" : 610,
+		"id" : 611,
 		"first_name" : "Blake",
 		"last_name" : "Wesley",
 		"country" : "US",
@@ -9151,7 +9166,7 @@
 		"team_id" : 19
 	},
 	{
-		"id" : 611,
+		"id" : 612,
 		"first_name" : "Russell",
 		"last_name" : "Westbrook",
 		"country" : "US",
@@ -9166,7 +9181,7 @@
 		"team_id" : 25
 	},
 	{
-		"id" : 612,
+		"id" : 613,
 		"first_name" : "Phillip",
 		"last_name" : "Wheeler",
 		"country" : "US",
@@ -9181,7 +9196,7 @@
 		"team_id" : 4
 	},
 	{
-		"id" : 613,
+		"id" : 614,
 		"first_name" : "Coby",
 		"last_name" : "White",
 		"country" : "US",
@@ -9196,7 +9211,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 614,
+		"id" : 615,
 		"first_name" : "Derrick",
 		"last_name" : "White",
 		"country" : "US",
@@ -9211,7 +9226,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 615,
+		"id" : 616,
 		"first_name" : "Cam",
 		"last_name" : "Whitmore",
 		"country" : "US",
@@ -9226,7 +9241,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 616,
+		"id" : 617,
 		"first_name" : "Aaron",
 		"last_name" : "Wiggins",
 		"country" : "US",
@@ -9241,7 +9256,7 @@
 		"team_id" : 18
 	},
 	{
-		"id" : 617,
+		"id" : 618,
 		"first_name" : "Andrew",
 		"last_name" : "Wiggins",
 		"country" : "CA",
@@ -9256,7 +9271,7 @@
 		"team_id" : 13
 	},
 	{
-		"id" : 618,
+		"id" : 619,
 		"first_name" : "Alondes",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9271,7 +9286,7 @@
 		"team_id" : 8
 	},
 	{
-		"id" : 619,
+		"id" : 620,
 		"first_name" : "Amari",
 		"last_name" : "Williams",
 		"country" : "GB",
@@ -9286,7 +9301,7 @@
 		"team_id" : 1
 	},
 	{
-		"id" : 620,
+		"id" : 621,
 		"first_name" : "Brandon",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9301,7 +9316,7 @@
 		"team_id" : 26
 	},
 	{
-		"id" : 621,
+		"id" : 622,
 		"first_name" : "Cody",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9316,7 +9331,7 @@
 		"team_id" : 20
 	},
 	{
-		"id" : 622,
+		"id" : 623,
 		"first_name" : "Grant",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9331,7 +9346,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 623,
+		"id" : 624,
 		"first_name" : "Jalen",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9346,7 +9361,7 @@
 		"team_id" : 18
 	},
 	{
-		"id" : 624,
+		"id" : 625,
 		"first_name" : "Jaylin",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9361,7 +9376,7 @@
 		"team_id" : 18
 	},
 	{
-		"id" : 625,
+		"id" : 626,
 		"first_name" : "Jeenathan",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9376,7 +9391,7 @@
 		"team_id" : 27
 	},
 	{
-		"id" : 626,
+		"id" : 627,
 		"first_name" : "Kenrich",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9391,7 +9406,7 @@
 		"team_id" : 18
 	},
 	{
-		"id" : 627,
+		"id" : 628,
 		"first_name" : "Mark",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9406,7 +9421,7 @@
 		"team_id" : 24
 	},
 	{
-		"id" : 628,
+		"id" : 629,
 		"first_name" : "Patrick",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9421,7 +9436,7 @@
 		"team_id" : 6
 	},
 	{
-		"id" : 629,
+		"id" : 630,
 		"first_name" : "Robert",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9436,7 +9451,7 @@
 		"team_id" : 19
 	},
 	{
-		"id" : 630,
+		"id" : 631,
 		"first_name" : "Vince",
 		"last_name" : "Williams Jr.",
 		"country" : "US",
@@ -9451,7 +9466,7 @@
 		"team_id" : 28
 	},
 	{
-		"id" : 631,
+		"id" : 632,
 		"first_name" : "Ziaire",
 		"last_name" : "Williams",
 		"country" : "US",
@@ -9466,7 +9481,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 632,
+		"id" : 633,
 		"first_name" : "Zion",
 		"last_name" : "Williamson",
 		"country" : "US",
@@ -9481,7 +9496,7 @@
 		"team_id" : 29
 	},
 	{
-		"id" : 633,
+		"id" : 634,
 		"first_name" : "Jalen",
 		"last_name" : "Wilson",
 		"country" : "US",
@@ -9496,7 +9511,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 634,
+		"id" : 635,
 		"first_name" : "James",
 		"last_name" : "Wiseman",
 		"country" : "US",
@@ -9511,7 +9526,7 @@
 		"team_id" : 9
 	},
 	{
-		"id" : 635,
+		"id" : 636,
 		"first_name" : "Danny",
 		"last_name" : "Wolf",
 		"country" : "US",
@@ -9526,7 +9541,7 @@
 		"team_id" : 2
 	},
 	{
-		"id" : 636,
+		"id" : 637,
 		"first_name" : "Isaiah",
 		"last_name" : "Wong",
 		"country" : "US",
@@ -9541,7 +9556,7 @@
 		"team_id" : 12
 	},
 	{
-		"id" : 637,
+		"id" : 638,
 		"first_name" : "Christian",
 		"last_name" : "Wood",
 		"country" : "US",
@@ -9556,7 +9571,7 @@
 		"team_id" : 23
 	},
 	{
-		"id" : 638,
+		"id" : 639,
 		"first_name" : "Delon",
 		"last_name" : "Wright",
 		"country" : "US",
@@ -9571,7 +9586,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 639,
+		"id" : 640,
 		"first_name" : "Guerschon",
 		"last_name" : "Yabusele",
 		"country" : "FR",
@@ -9586,7 +9601,7 @@
 		"team_id" : 3
 	},
 	{
-		"id" : 640,
+		"id" : 641,
 		"first_name" : "Jahmir",
 		"last_name" : "Young",
 		"country" : "US",
@@ -9601,7 +9616,7 @@
 		"team_id" : 13
 	},
 	{
-		"id" : 641,
+		"id" : 642,
 		"first_name" : "Trae",
 		"last_name" : "Young",
 		"country" : "US",
@@ -9616,7 +9631,7 @@
 		"team_id" : 11
 	},
 	{
-		"id" : 642,
+		"id" : 643,
 		"first_name" : "Chris",
 		"last_name" : "Youngblood",
 		"country" : "US",
@@ -9631,7 +9646,7 @@
 		"team_id" : 18
 	},
 	{
-		"id" : 643,
+		"id" : 644,
 		"first_name" : "Ivica",
 		"last_name" : "Zubac",
 		"country" : "BA",
@@ -9646,7 +9661,7 @@
 		"team_id" : 22
 	},
 	{
-		"id" : 644,
+		"id" : 645,
 		"first_name" : "Malcolm",
 		"last_name" : "Brogdon",
 		"country" : "US",
@@ -9661,7 +9676,7 @@
 		"team_id" : 15
 	},
 	{
-		"id" : 645,
+		"id" : 646,
 		"first_name" : "Nigel",
 		"last_name" : "Hayes-Davis",
 		"country" : "US",
@@ -9676,7 +9691,7 @@
 		"team_id" : 24
 	},
 	{
-		"id" : 646,
+		"id" : 647,
 		"first_name" : "Egor",
 		"last_name" : "Demin",
 		"country" : "RU",
@@ -9689,21 +9704,6 @@
 		"draft_round" : 1,
 		"draft_number" : 8,
 		"team_id" : 2
-	},
-	{
-		"id" : 647,
-		"first_name" : "Alijah",
-		"last_name" : "Martin",
-		"country" : "US",
-		"college" : "Florida",
-		"position" : "SG",
-		"height" : "6-2",
-		"weight" : 210,
-		"jersey_number" : 55,
-		"draft_year" : 2025,
-		"draft_round" : 2,
-		"draft_number" : 9,
-		"team_id" : 5
 	},
 	{
 		"id" : 648,

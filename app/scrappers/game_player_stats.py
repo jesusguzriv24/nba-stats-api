@@ -78,13 +78,10 @@ def get_season_key_for_date(game_date_str: str) -> str:
 # ---------------------------------------------------------------------- 
 def normalize_player_name(name: str) -> str:
     """
-    Normalize player names to match database format:
-    - Remove accents
-    - Remove apostrophes and non-alphanumeric chars
-    - Keep spaces
-    - Do not change case (you can .title() or .upper() if needed)
-    Example:
-      "De'Aaron Fox" -> "DeAaron Fox"
+    Normalize player names for API OUTPUT:
+    - Remove accents but KEEP apostrophes
+    - Preserve original capitalization
+    Example: "De'Aaron Fox" -> "De'Aaron Fox"
     """
     if not name:
         return ""
@@ -96,12 +93,12 @@ def normalize_player_name(name: str) -> str:
     )
 
     # Remove all non alphanumeric and non-space characters (apostrophes, etc.)
-    name_norm = re.sub(r"[^A-Za-z0-9 ]+", "", name_norm)
+    name_norm = re.sub(r"[^a-zA-Z0-9\s\-\.']", "", name_norm)
 
     # Optional: strip extra spaces
-    name_norm = " ".join(name_norm.split())
+    #name_norm = " ".join(name_norm.split())
 
-    return name_norm
+    return name_norm.strip()
 
 
 # ----------------------------------------------------------------------

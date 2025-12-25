@@ -10,6 +10,7 @@ starlette==0.50.0
 # Database & ORM
 SQLAlchemy==2.0.44
 asyncpg==0.31.0
+psycopg2-binary==2.9.9
 
 # Environment & Configuration
 python-dotenv==1.1.1
@@ -24,8 +25,9 @@ beautifulsoup4==4.13.3
 lxml==5.3.2
 
 # Authentication & Security
-python-jose==3.5.0
+python-jose[cryptography]==3.5.0
 passlib==1.7.4
+argon2-cffi==23.1.0
 cryptography==46.0.3
 
 # HTTP & Async
@@ -52,6 +54,9 @@ annotated-types==0.7.0
 # Testing
 pytest==8.0.0
 pytest-asyncio==0.23.0
+
+# Supabase
+supabase==2.4.2
 
 # ============================================
 # Optional Dependencies (commented out)

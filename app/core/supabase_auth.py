@@ -2,7 +2,6 @@
 Utilities for validating Supabase JWT tokens and synchronizing users.
 """
 import os
-import requests
 from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -15,45 +14,18 @@ from app.models.user import User
 
 load_dotenv()
 
-# Supabase configuration
-SUPABASE_URL = os.getenv("SUPABASE_URL")
+# Supabase JWT secret from environment
 SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
 
 # Security scheme for FastAPI
 security = HTTPBearer(auto_error=False)
-
-# Cache for JWKS (public keys)
-_jwks_cache = None
-
-
-def get_jwks():
-    """
-    Fetch public keys (JWKS) from Supabase for validating ES256 tokens.
-    
-    Caches the keys to avoid repeated network calls.
-    """
-    global _jwks_cache
-    
-    if _jwks_cache is not None:
-        return _jwks_cache
-    
-    try:
-        # Supabase exposes public keys at /.well-known/jwks.json
-        jwks_url = f"{SUPABASE_URL}/auth/v1/jwks"
-        response = requests.get(jwks_url, timeout=5)
-        response.raise_for_status()
-        _jwks_cache = response.json()
-        return _jwks_cache
-    except Exception as e:
-        print(f"[WARNING] Failed to fetch JWKS from Supabase: {e}")
-        return None
 
 
 def decode_supabase_jwt(token: str) -> dict:
     """
     Decode and validate a JWT issued by Supabase Auth.
     
-    Supports both HS256 (legacy) and ES256 (current) algorithms.
+    Attempts multiple HMAC algorithms: HS256, HS384, HS512.
     
     Args:
         token: JWT token string
@@ -62,69 +34,37 @@ def decode_supabase_jwt(token: str) -> dict:
         dict: Token payload with fields like 'sub', 'email', 'role', etc.
         
     Raises:
-        HTTPException: If token is invalid or expired
+        HTTPException: If token is invalid or secret not configured
     """
-    # Try HS256 first (legacy, for compatibility)
-    if SUPABASE_JWT_SECRET:
+    if not SUPABASE_JWT_SECRET:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="SUPABASE_JWT_SECRET not configured"
+        )
+    
+    # List of algorithms to attempt
+    algorithms_to_try = ["HS256", "HS384", "HS512"]
+    
+    # Try decoding with each algorithm
+    for algorithm in algorithms_to_try:
         try:
             payload = jwt.decode(
                 token,
                 SUPABASE_JWT_SECRET,
-                algorithms=["HS256"],
+                algorithms=[algorithm],
                 options={"verify_aud": False}
             )
-            print("[SUCCESS] JWT validated with HS256")
+            print(f"[SUCCESS] JWT validated with {algorithm}")
             return payload
-        except JWTError as e:
-            print(f"[INFO] HS256 validation failed: {e}, trying ES256...")
+        except JWTError:
+            continue
     
-    # Try ES256 with JWKS
-    try:
-        # Get header without validation to extract 'kid'
-        unverified_header = jwt.get_unverified_header(token)
-        algorithm = unverified_header.get("alg", "ES256")
-        kid = unverified_header.get("kid")
-        
-        print(f"[INFO] Token algorithm: {algorithm}, key ID: {kid}")
-        
-        # Fetch JWKS
-        jwks = get_jwks()
-        if not jwks:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Could not fetch JWKS from Supabase"
-            )
-        
-        # Find the correct public key
-        public_key = None
-        for key in jwks.get("keys", []):
-            if key.get("kid") == kid:
-                public_key = key
-                break
-        
-        if not public_key:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Could not find public key for kid: {kid}"
-            )
-        
-        # Validate token with public key
-        payload = jwt.decode(
-            token,
-            public_key,
-            algorithms=[algorithm],
-            options={"verify_aud": False}
-        )
-        
-        print(f"[SUCCESS] JWT validated with {algorithm}")
-        return payload
-        
-    except JWTError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid authentication token: {str(e)}",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    # If no HMAC algorithm worked, token is invalid
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid authentication token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 async def get_or_create_user_from_jwt(
@@ -187,7 +127,7 @@ async def get_current_user_from_supabase(
     """
     Dependency to get current user from Supabase JWT.
     
-    Returns None if no token (allows dual auth with API keys).
+    Returns None if no token present (allows dual auth with API keys).
     
     Args:
         credentials: Credentials from Authorization header
@@ -198,6 +138,7 @@ async def get_current_user_from_supabase(
         
     Raises:
         HTTPException 401: If token is present but invalid
+        HTTPException 403: If user account is inactive
     """
     # If no credentials, return None (not an error)
     if not credentials:

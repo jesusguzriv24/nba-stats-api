@@ -76,7 +76,7 @@ async def create_api_key(
     """
     Generate a new API key for the authenticated user.
     
-    ⚠️ IMPORTANT: The complete API key is shown ONLY ONCE in this response.
+    IMPORTANT: The complete API key is shown ONLY ONCE in this response.
     Store it securely - you will not be able to retrieve or view it again after this response.
     If lost, the key must be revoked and a new one created.
     
@@ -111,7 +111,7 @@ async def create_api_key(
     await db.commit()
     await db.refresh(new_api_key)
     
-    print(f"🔑 API Key created: {data.name} for {user.email} (ID: {new_api_key.id})")
+    print(f"API Key created: {data.name} for {user.email} (ID: {new_api_key.id})")
     
     # Return response with complete key (shown only this time)
     return APIKeyResponseWithKey(
@@ -122,7 +122,7 @@ async def create_api_key(
         rate_limit_plan=new_api_key.rate_limit_plan,
         created_at=new_api_key.created_at,
         revoked_at=new_api_key.revoked_at,
-        key=key_data["key"]  # 👈 Complete key only returned here
+        key=key_data["key"]  #Complete key only returned here
     )
 
 
@@ -197,6 +197,6 @@ async def revoke_api_key(
     
     await db.commit()
     
-    print(f"🔒 API Key revoked: {api_key.name} (ID: {api_key.id})")
+    print(f"API Key revoked: {api_key.name} (ID: {api_key.id})")
     
     return None

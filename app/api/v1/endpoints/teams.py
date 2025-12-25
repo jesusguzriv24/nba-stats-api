@@ -12,6 +12,9 @@ from app.models.game import Game, GameType
 from app.schemas.team import TeamResponse
 from app.schemas.game import GameResponse
 
+from app.core.dependencies import get_current_user
+from app.models.user import User
+
 router = APIRouter()
 
 
@@ -22,6 +25,7 @@ async def list_teams(
     search: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Team)
@@ -45,7 +49,11 @@ async def list_teams(
 
 
 @router.get("/{team_id}", response_model=TeamResponse)
-async def get_team(team_id: int, db: AsyncSession = Depends(get_db)):
+async def get_team(
+    team_id: int, 
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+
     res = await db.execute(select(Team).where(Team.id == team_id))
     team = res.scalar_one_or_none()
     if not team:
@@ -65,6 +73,7 @@ async def get_team_games(
     ),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Game).where(

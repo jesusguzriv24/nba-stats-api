@@ -16,6 +16,9 @@ from app.schemas.team_game_stats import TeamGameStatsResponse
 from app.schemas.player_game_stats import PlayerGameStatsResponse
 from app.schemas.boxscore import GameBoxscoreResponse
 
+from app.core.dependencies import get_current_user
+from app.models.user import User
+
 router = APIRouter()
 
 
@@ -32,6 +35,7 @@ async def list_games(
     ),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Game)
@@ -91,7 +95,11 @@ async def list_games(
 
 
 @router.get("/{game_id}", response_model=GameResponse)
-async def get_game(game_id: int, db: AsyncSession = Depends(get_db)):
+async def get_game(
+    game_id: int, 
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+
     res = await db.execute(
         select(Game)
         .options(selectinload(Game.home_team), selectinload(Game.visitor_team))
@@ -104,7 +112,11 @@ async def get_game(game_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{game_id}/team-stats", response_model=List[TeamGameStatsResponse])
-async def get_game_team_stats(game_id: int, db: AsyncSession = Depends(get_db)):
+async def get_game_team_stats(
+    game_id: int, 
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+
     res = await db.execute(
         select(TeamGameStats)
         .options(selectinload(TeamGameStats.team), selectinload(TeamGameStats.opponent))
@@ -117,7 +129,11 @@ async def get_game_team_stats(game_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{game_id}/player-stats", response_model=List[PlayerGameStatsResponse])
-async def get_game_player_stats(game_id: int, db: AsyncSession = Depends(get_db)):
+async def get_game_player_stats(
+    game_id: int, 
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+
     res = await db.execute(
         select(PlayerGameStats)
         .options(
@@ -133,7 +149,11 @@ async def get_game_player_stats(game_id: int, db: AsyncSession = Depends(get_db)
 
 
 @router.get("/{game_id}/boxscore", response_model=GameBoxscoreResponse)
-async def get_game_boxscore(game_id: int, db: AsyncSession = Depends(get_db)):
+async def get_game_boxscore(
+    game_id: int, 
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)):
+
     # Game
     res_game = await db.execute(
         select(Game)

@@ -9,6 +9,9 @@ from app.models.team_game_stats import TeamGameStats
 from app.models.game import Game, GameType
 from app.schemas.team_stats_rank import TeamStatsRank
 
+from app.core.dependencies import get_current_user
+from app.models.user import User
+
 router = APIRouter()
 
 
@@ -21,6 +24,7 @@ async def team_rankings(
     ),
     sort_by: str = Query("offensive_rating"),
     limit: int = Query(30, ge=1, le=30),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     sort_map = {

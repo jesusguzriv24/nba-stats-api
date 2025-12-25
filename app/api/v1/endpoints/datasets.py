@@ -12,6 +12,9 @@ from app.models.player_game_stats import PlayerGameStats
 from app.models.team_game_stats import TeamGameStats
 from app.schemas.datasets import PlayerGameDatasetRow, TeamGameDatasetRow
 
+from app.core.dependencies import get_current_user
+from app.models.user import User
+
 router = APIRouter()
 
 
@@ -31,6 +34,7 @@ async def get_player_game_dataset(
     player_id: Optional[int] = Query(None),
     limit: int = Query(10_000, ge=1, le=100_000),
     skip: int = Query(0, ge=0),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -193,6 +197,7 @@ async def get_team_game_dataset(
     team_id: Optional[int] = Query(None),
     limit: int = Query(10_000, ge=1, le=100_000),
     skip: int = Query(0, ge=0),
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """

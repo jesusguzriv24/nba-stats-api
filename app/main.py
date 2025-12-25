@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.security import HTTPBearer, APIKeyHeader
+
 from app.core.database import engine, Base
 from app.api.v1.router import api_v1_router
 
@@ -41,6 +43,23 @@ app = FastAPI(
     title="NBA Stats API",
     version="1.0.0",
     lifespan=lifespan,
+    description="""
+    Public NBA statistics API with authentication.
+
+    ## Authentication
+
+    This API supports **two authentication methods**:
+
+    ### 1. Supabase JWT (for web users)
+    - Sign up through the frontend
+    - Use the JWT token in the header: `Authorization: Bearer <token>`
+
+    ### 2. API Key (for developers/scripts)
+    - Generate your API key from `/users/me/api-keys`
+    - Use the key in the header: `X-API-Key: <your-api-key>`
+
+    All read-only endpoints require authentication.
+    """
 )
 
 
@@ -62,7 +81,7 @@ app.add_middleware(
 )
 
 
-# --- Root health / welcome endpoint ---
+# --- Root health / welcome endpoint --- 
 @app.get("/")
 async def root():
     """
@@ -70,7 +89,15 @@ async def root():
 
     Can be used by uptime checks or to verify that the API is running.
     """
-    return {"message": "Welcome to the NBA Stats API - 2025", "status": "OK"}
+    return {
+        "message": "Welcome to the NBA Stats API",
+        "status": "OK",
+        "docs": "/docs",
+        "authentication": {
+            "jwt": "Authorization: Bearer <token>",
+            "api_key": "X-API-Key: <key>"
+        }
+    }
 
 
 # --- Mount versioned API routers ---

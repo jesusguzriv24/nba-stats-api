@@ -1,7 +1,8 @@
 """
-Utilities for validating Supabase Auth JWT tokens and synchronizing users.
+Utilities for validating Supabase JWT tokens and synchronizing users.
 """
 import os
+import requests
 from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -14,46 +15,110 @@ from app.models.user import User
 
 load_dotenv()
 
-# Supabase authentication configuration
+# Supabase configuration
+SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
-SUPABASE_JWT_ALGORITHM = "HS256"
 
-# FastAPI security scheme for HTTP Bearer token (auto_error=False to allow flexible auth)
+# Security scheme for FastAPI
 security = HTTPBearer(auto_error=False)
+
+# Cache for JWKS (public keys)
+_jwks_cache = None
+
+
+def get_jwks():
+    """
+    Fetch public keys (JWKS) from Supabase for validating ES256 tokens.
+    
+    Caches the keys to avoid repeated network calls.
+    """
+    global _jwks_cache
+    
+    if _jwks_cache is not None:
+        return _jwks_cache
+    
+    try:
+        # Supabase exposes public keys at /.well-known/jwks.json
+        jwks_url = f"{SUPABASE_URL}/auth/v1/jwks"
+        response = requests.get(jwks_url, timeout=5)
+        response.raise_for_status()
+        _jwks_cache = response.json()
+        return _jwks_cache
+    except Exception as e:
+        print(f"[WARNING] Failed to fetch JWKS from Supabase: {e}")
+        return None
 
 
 def decode_supabase_jwt(token: str) -> dict:
     """
-    Decode and validate a JWT token issued by Supabase Auth.
+    Decode and validate a JWT issued by Supabase Auth.
     
-    This function verifies the JWT signature using the Supabase secret key
-    and returns the decoded payload. The 'aud' claim is not verified as
-    Supabase doesn't always include it.
+    Supports both HS256 (legacy) and ES256 (current) algorithms.
     
     Args:
-        token (str): JWT token string to decode and validate
+        token: JWT token string
         
     Returns:
-        dict: Decoded JWT payload containing 'sub', 'email', 'role', and other claims
+        dict: Token payload with fields like 'sub', 'email', 'role', etc.
         
     Raises:
-        HTTPException: 500 if SUPABASE_JWT_SECRET is not configured
-        HTTPException: 401 if the token is invalid, expired, or malformed
+        HTTPException: If token is invalid or expired
     """
-    if not SUPABASE_JWT_SECRET:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="SUPABASE_JWT_SECRET not configured"
-        )
+    # Try HS256 first (legacy, for compatibility)
+    if SUPABASE_JWT_SECRET:
+        try:
+            payload = jwt.decode(
+                token,
+                SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                options={"verify_aud": False}
+            )
+            print("[SUCCESS] JWT validated with HS256")
+            return payload
+        except JWTError as e:
+            print(f"[INFO] HS256 validation failed: {e}, trying ES256...")
     
+    # Try ES256 with JWKS
     try:
+        # Get header without validation to extract 'kid'
+        unverified_header = jwt.get_unverified_header(token)
+        algorithm = unverified_header.get("alg", "ES256")
+        kid = unverified_header.get("kid")
+        
+        print(f"[INFO] Token algorithm: {algorithm}, key ID: {kid}")
+        
+        # Fetch JWKS
+        jwks = get_jwks()
+        if not jwks:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Could not fetch JWKS from Supabase"
+            )
+        
+        # Find the correct public key
+        public_key = None
+        for key in jwks.get("keys", []):
+            if key.get("kid") == kid:
+                public_key = key
+                break
+        
+        if not public_key:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Could not find public key for kid: {kid}"
+            )
+        
+        # Validate token with public key
         payload = jwt.decode(
             token,
-            SUPABASE_JWT_SECRET,
-            algorithms=[SUPABASE_JWT_ALGORITHM],
-            options={"verify_aud": False}  # Supabase doesn't always include 'aud' claim
+            public_key,
+            algorithms=[algorithm],
+            options={"verify_aud": False}
         )
+        
+        print(f"[SUCCESS] JWT validated with {algorithm}")
         return payload
+        
     except JWTError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -67,21 +132,19 @@ async def get_or_create_user_from_jwt(
     db: AsyncSession
 ) -> User:
     """
-    Retrieve or create a user based on JWT payload.
+    Fetch or create user from JWT payload (lazy sync).
     
-    This function implements lazy synchronization: it searches for an existing user
-    by their Supabase user ID. If the user doesn't exist, a new user record is
-    automatically created with default settings (free tier, active status).
+    Searches for user by supabase_user_id and creates if not found.
     
     Args:
-        payload (dict): Decoded JWT payload from Supabase Auth
-        db (AsyncSession): Async database session
+        payload: Decoded JWT payload
+        db: Database session
         
     Returns:
-        User: User model instance (newly created or existing)
+        User: User instance
         
     Raises:
-        HTTPException: 401 if 'sub' or 'email' is missing from the token payload
+        HTTPException: If payload is missing required fields
     """
     supabase_user_id = payload.get("sub")
     email = payload.get("email")
@@ -92,13 +155,13 @@ async def get_or_create_user_from_jwt(
             detail="Invalid token payload: missing sub or email"
         )
     
-    # Query database for existing user by Supabase user ID
+    # Search for existing user
     result = await db.execute(
         select(User).where(User.supabase_user_id == supabase_user_id)
     )
     user = result.scalar_one_or_none()
     
-    # Create new user if not found (lazy synchronization approach)
+    # If not found, create (lazy sync)
     if not user:
         user = User(
             supabase_user_id=supabase_user_id,
@@ -112,7 +175,7 @@ async def get_or_create_user_from_jwt(
         await db.commit()
         await db.refresh(user)
         
-        print(f"✅ User created via lazy sync: {email} (ID: {user.id})")
+        print(f"[SUCCESS] User created via lazy sync: {email} (ID: {user.id})")
     
     return user
 
@@ -122,41 +185,31 @@ async def get_current_user_from_supabase(
     db: AsyncSession = Depends(get_db)
 ) -> User | None:
     """
-    FastAPI dependency to extract and validate the current authenticated user from JWT.
+    Dependency to get current user from Supabase JWT.
     
-    This dependency has been updated to support flexible dual authentication (JWT + API Key).
-    It now returns None if no token is provided instead of raising an error, allowing
-    fallback to other authentication methods like API keys.
-    
-    When a token is provided, it must be valid and the user account must be active.
-    
-    Usage in endpoints:
-        @app.get("/protected")
-        async def protected_route(user: User = Depends(get_current_user_from_supabase)):
-            return {"user_id": user.id, "email": user.email}
+    Returns None if no token (allows dual auth with API keys).
     
     Args:
-        credentials (HTTPAuthorizationCredentials): HTTP Bearer token from Authorization header
-        db (AsyncSession): Async database session
+        credentials: Credentials from Authorization header
+        db: Database session
         
     Returns:
-        User | None: Authenticated user if valid JWT provided, None if no credentials
+        User if valid JWT found, None if no token present
         
     Raises:
-        HTTPException: 401 if token is provided but invalid
-        HTTPException: 403 if user account is inactive
+        HTTPException 401: If token is present but invalid
     """
-    # Return None if no credentials provided (allows fallback to API key auth)
+    # If no credentials, return None (not an error)
     if not credentials:
         return None
     
-    # Decode and validate JWT token from the Authorization header
+    # Decode JWT
     payload = decode_supabase_jwt(credentials.credentials)
     
-    # Retrieve existing user or create new one via lazy sync
+    # Get or create user in database
     user = await get_or_create_user_from_jwt(payload, db)
     
-    # Verify that the user account is active
+    # Validate user is active
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

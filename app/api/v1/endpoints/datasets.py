@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,6 +15,8 @@ from app.schemas.datasets import PlayerGameDatasetRow, TeamGameDatasetRow
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
+from app.core.rate_limit import limiter, get_rate_limit_for_user
+
 router = APIRouter()
 
 
@@ -22,7 +24,9 @@ router = APIRouter()
 # GET /api/v1/datasets/player-game-stats
 # ---------------------------------------------------------------------------
 @router.get("/player-game-stats", response_model=List[PlayerGameDatasetRow])
+@limiter.limit(get_rate_limit_for_user)
 async def get_player_game_dataset(
+    request: Request,
     season: Optional[int] = Query(None),
     from_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
     to_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
@@ -186,7 +190,9 @@ async def get_player_game_dataset(
 # GET /api/v1/datasets/team-game-stats
 # ---------------------------------------------------------------------------
 @router.get("/team-game-stats", response_model=List[TeamGameDatasetRow])
+@limiter.limit(get_rate_limit_for_user)
 async def get_team_game_dataset(
+    request: Request,
     season: Optional[int] = Query(None),
     from_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
     to_date: Optional[str] = Query(None, description="YYYY-MM-DD"),

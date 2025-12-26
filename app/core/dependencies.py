@@ -4,7 +4,7 @@ FastAPI dependencies for authentication and authorization.
 Supports both Supabase JWT tokens and custom API keys for API authentication.
 This module provides flexible authentication options for different API consumers.
 """
-from fastapi import Depends, HTTPException, status, Security
+from fastapi import Depends, HTTPException, status, Security, Request
 from fastapi.security import APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -20,6 +20,7 @@ api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 
 async def get_current_user_from_api_key(
+    request: Request,
     api_key: str = Security(api_key_header),
     db: AsyncSession = Depends(get_db)
 ) -> User | None:
@@ -42,57 +43,85 @@ async def get_current_user_from_api_key(
         HTTPException 401: If associated user account is inactive
     """
     # Return None if no API key in header (allows fallback to other auth methods)
-    if not api_key:
-        return None
+
+    try: 
+        if not api_key:
+            print("No API key provided")
+            return None
     
-    print(f"🔑 Validating API Key: {api_key[:20]}...")
+        print(f"Validating API Key: {api_key[:20]}...")
     
-    # Query all active, non-revoked API keys
-    result = await db.execute(
-        select(APIKey)
-        .where(APIKey.is_active == True)
-        .where(APIKey.revoked_at == None)
-    )
-    active_keys = result.scalars().all()
-    
-    # Verify the provided key against each stored hash (secure comparison)
-    matched_key = None
-    for db_key in active_keys:
-        if verify_api_key(api_key, db_key.key_hash):
-            matched_key = db_key
-            break
-    
-    if not matched_key:
-        print(f"❌ Invalid or revoked API Key")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or revoked API key",
-            headers={"WWW-Authenticate": "ApiKey"},
+        # Query all active, non-revoked API keys
+        result = await db.execute(
+            select(APIKey)
+            .where(APIKey.is_active == True)
+            .where(APIKey.revoked_at == None)
         )
+        active_keys = result.scalars().all()
+
+        print(f"Total active keys in DB: {len(active_keys)}")
     
-    # Retrieve the user associated with this API key
-    result = await db.execute(
-        select(User).where(User.id == matched_key.user_id)
-    )
-    user = result.scalar_one_or_none()
+        # Verify the provided key against each stored hash (secure comparison)
+        matched_key = None
+        for db_key in active_keys:
+            if verify_api_key(api_key, db_key.key_hash):
+                matched_key = db_key
+                break
     
-    if not user or not user.is_active:
-        print(f"❌ Associated user account is inactive")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User account is inactive"
+        if not matched_key:
+            print(f"❌ Invalid or revoked API Key")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or revoked API key",
+                headers={"WWW-Authenticate": "ApiKey"},
+            )
+    
+        # Retrieve the user associated with this API key
+        print(f"Searching for user ID: {matched_key.user_id}")
+        result = await db.execute(
+            select(User).where(User.id == matched_key.user_id)
         )
+        user = result.scalar_one_or_none()
     
-    print(f"✅ Valid API Key for: {user.email}")
+        if not user:
+            print(f" User not found")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found"
+            )
+        
+        if not user.is_active:
+            print(f"Inactive user: {user.email}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User account is inactive"
+            )
     
-    # Increment usage counter for metrics and monitoring
-    user.usage_count += 1
-    await db.commit()
+        print(f"Valid API Key for: {user.email}")
     
-    return user
+        # Increment usage counter for metrics and monitoring
+        user.usage_count += 1
+        await db.commit()
+
+        request.state.user = user
+    
+        return user
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"\nERROR in get_current_user_from_api_key:")
+        print(f"   Type: {type(e).__name__}")
+        print(f"   Message: {str(e)}")
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
 
 
 async def get_current_user(
+    request: Request,
     jwt_user: User = Depends(get_current_user_from_supabase),
     api_key_user: User | None = Depends(get_current_user_from_api_key),
 ) -> User:
@@ -125,12 +154,12 @@ async def get_current_user(
     """
     # Use JWT user if available (higher priority)
     if jwt_user:
-        print(f"👤 Authenticated via JWT: {jwt_user.email}")
+        print(f"Authenticated via JWT: {jwt_user.email}")
         return jwt_user
     
     # Fallback to API Key user if JWT not available
     if api_key_user:
-        print(f"🔑 Authenticated via API Key: {api_key_user.email}")
+        print(f"Authenticated via API Key: {api_key_user.email}")
         return api_key_user
     
     # Neither authentication method succeeded

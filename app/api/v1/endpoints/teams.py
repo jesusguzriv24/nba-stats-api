@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
@@ -15,11 +15,15 @@ from app.schemas.game import GameResponse
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
+from app.core.rate_limit import limiter, get_rate_limit_for_user
+
 router = APIRouter()
 
 
 @router.get("/", response_model=List[TeamResponse])
+@limiter.limit(get_rate_limit_for_user)
 async def list_teams(
+    request: Request,
     conference: Optional[str] = Query(None),
     division: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
@@ -49,7 +53,9 @@ async def list_teams(
 
 
 @router.get("/{team_id}", response_model=TeamResponse)
+@limiter.limit(get_rate_limit_for_user)
 async def get_team(
+    request: Request,
     team_id: int, 
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
@@ -62,7 +68,9 @@ async def get_team(
 
 
 @router.get("/{team_id}/games", response_model=List[GameResponse])
+@limiter.limit(get_rate_limit_for_user)
 async def get_team_games(
+    request: Request,
     team_id: int,
     season: Optional[int] = Query(None),
     from_date: Optional[str] = Query(None, description="YYYY-MM-DD"),

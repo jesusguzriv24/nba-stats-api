@@ -1,13 +1,16 @@
-from typing import List
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
+from typing import List
 from fastapi.security import HTTPBearer, APIKeyHeader
 
 from app.core.database import engine, Base
 from app.api.v1.router import api_v1_router
+from app.core.rate_limit import limiter
 
 
 # --- Lifespan events (startup / shutdown) ---
@@ -59,9 +62,22 @@ app = FastAPI(
     - Use the key in the header: `X-API-Key: <your-api-key>`
 
     All read-only endpoints require authentication.
+
+    ----------- Rate Limiting -----------
+
+        **Free Tier:** 100 requests/hour  
+        **Pro Tier:** 1,000 requests/hour  
+        **Enterprise Tier:** 10,000 requests/hour
+
+        Headers de respuesta:
+        - `X-RateLimit-Limit`: 
+        - `X-RateLimit-Remaining`: 
+        - `X-RateLimit-Reset`: Timestamp 
     """
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # --- CORS configuration ---
 # Allowed origins for browser-based clients (e.g. Next.js frontend).
@@ -83,6 +99,7 @@ app.add_middleware(
 
 # --- Root health / welcome endpoint --- 
 @app.get("/")
+@limiter.limit("10/minute")
 async def root():
     """
     Simple health/welcome endpoint.
@@ -96,6 +113,11 @@ async def root():
         "authentication": {
             "jwt": "Authorization: Bearer <token>",
             "api_key": "X-API-Key: <key>"
+        },
+        "rate_limiting": {
+            "free": "100/hour",
+            "pro": "1000/hour",
+            "enterprise": "10000/hour"
         }
     }
 

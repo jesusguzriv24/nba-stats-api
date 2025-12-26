@@ -1,6 +1,6 @@
 # app/api/v1/routes/stats.py
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
@@ -12,11 +12,15 @@ from app.schemas.team_stats_rank import TeamStatsRank
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
+from app.core.rate_limit import limiter, get_rate_limit_for_user
+
 router = APIRouter()
 
 
 @router.get("/teams", response_model=List[TeamStatsRank])
+@limiter.limit(get_rate_limit_for_user)
 async def team_rankings(
+    request: Request,
     season: int = Query(...),
     game_type: Optional[GameType] = Query(
         None,

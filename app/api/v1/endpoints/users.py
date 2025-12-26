@@ -2,7 +2,7 @@
 Endpoints for user profile and API key management.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
@@ -19,6 +19,8 @@ from app.schemas.api_key import (
     APIKeyResponseWithKey
 )
 
+from app.core.rate_limit import limiter, get_rate_limit_for_user
+
 router = APIRouter()
 
 
@@ -33,7 +35,9 @@ async def health_check():
 
 
 @router.get("/me", response_model=UserWithKeysResponse)
+@limiter.limit(get_rate_limit_for_user)
 async def get_current_user_profile(
+    request: Request,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -68,7 +72,9 @@ async def get_current_user_profile(
 
 
 @router.post("/me/api-keys", response_model=APIKeyResponseWithKey, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/hour")
 async def create_api_key(
+    request: Request,
     data: APIKeyCreate,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
@@ -127,7 +133,9 @@ async def create_api_key(
 
 
 @router.get("/me/api-keys", response_model=List[APIKeyResponse])
+@limiter.limit(get_rate_limit_for_user)
 async def list_my_api_keys(
+    request: Request,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -154,7 +162,9 @@ async def list_my_api_keys(
 
 
 @router.delete("/me/api-keys/{key_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("20/hour")
 async def revoke_api_key(
+    request: Request,
     key_id: int,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -19,11 +19,15 @@ from app.schemas.boxscore import GameBoxscoreResponse
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
+from app.core.rate_limit import limiter, get_rate_limit_for_user
+
 router = APIRouter()
 
 
 @router.get("/", response_model=List[GameResponse])
+@limiter.limit(get_rate_limit_for_user)
 async def list_games(
+    request: Request,
     season: Optional[int] = Query(None),
     from_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
     to_date: Optional[str] = Query(None, description="YYYY-MM-DD"),
@@ -95,7 +99,9 @@ async def list_games(
 
 
 @router.get("/{game_id}", response_model=GameResponse)
+@limiter.limit(get_rate_limit_for_user)
 async def get_game(
+    request: Request,
     game_id: int, 
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
@@ -112,7 +118,9 @@ async def get_game(
 
 
 @router.get("/{game_id}/team-stats", response_model=List[TeamGameStatsResponse])
+@limiter.limit(get_rate_limit_for_user)
 async def get_game_team_stats(
+    request: Request,
     game_id: int, 
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
@@ -129,7 +137,9 @@ async def get_game_team_stats(
 
 
 @router.get("/{game_id}/player-stats", response_model=List[PlayerGameStatsResponse])
+@limiter.limit(get_rate_limit_for_user)
 async def get_game_player_stats(
+    request: Request,
     game_id: int, 
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):
@@ -149,7 +159,9 @@ async def get_game_player_stats(
 
 
 @router.get("/{game_id}/boxscore", response_model=GameBoxscoreResponse)
+@limiter.limit(get_rate_limit_for_user)
 async def get_game_boxscore(
+    request: Request,
     game_id: int, 
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)):

@@ -58,11 +58,14 @@ pytest-asyncio==0.23.0
 # Supabase
 #supabase==2.4.2
 
+# Rate Limiting & Caching
+slowapi==0.1.9
+redis==7.1.0
+
 # ============================================
 # Optional Dependencies (commented out)
 # ============================================
 # matplotlib==3.10.7          # Plotting (if needed for analytics)
 # scikit-learn==1.7.2         # ML models (if needed)
 # scipy==1.16.2               # Scientific computing (if needed)
-# redis==7.1.0                # Caching (if needed)
 # gunicorn==23.0.0            # Production server (alternative to uvicorn)

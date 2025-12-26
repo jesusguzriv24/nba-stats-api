@@ -100,7 +100,7 @@ app.add_middleware(
 # --- Root health / welcome endpoint --- 
 @app.get("/")
 @limiter.limit("10/minute")
-async def root():
+async def root(request: Request):
     """
     Simple health/welcome endpoint.
 

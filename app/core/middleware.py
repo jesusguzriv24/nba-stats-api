@@ -7,8 +7,8 @@ from app.models.api_key import APIKey
 from app.models.user import User
 from sqlalchemy import select
 from app.core.database import async_session_maker
-from app.core.rate_limit import set_rate_limit_tier
-
+from app.core.rate_limit import set_rate_limit_tier, limiter
+import time
 
 async def rate_limit_tier_middleware(request: Request, call_next):
     """
@@ -56,9 +56,59 @@ async def rate_limit_tier_middleware(request: Request, call_next):
             print(f"[MIDDLEWARE] Error checking API key: {e}")
             # Continue with default tier on error
     
+    # Setear tier en ContextVar
     set_rate_limit_tier(tier)
-
+    
+    # También mantenerlo en request.state para otros usos
     request.state.rate_limit_tier = tier
     
     response = await call_next(request)
+    return response
+
+
+async def rate_limit_headers_middleware(request: Request, call_next):
+    """
+    Middleware that adds rate limit headers to responses.
+    
+    Headers added:
+    - X-RateLimit-Limit: Total requests allowed in window
+    - X-RateLimit-Remaining: Remaining requests in current window
+    - X-RateLimit-Reset: Unix timestamp when limit resets
+    """
+    response = await call_next(request)
+    
+    # Get rate limit info from SlowAPI's limiter
+    try:
+        # Get the rate limit key for this request
+        rate_limit_key = limiter._key_func(request)
+        
+        # Get tier from request.state
+        tier = getattr(request.state, "rate_limit_tier", "free")
+        
+        # Parse limit from tier (e.g., "100/hour" -> 100)
+        from app.core.rate_limit import RATE_LIMIT_TIERS
+        limit_string = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
+        limit_value = int(limit_string.split("/")[0])
+        
+        # Get current window stats from limiter
+        window_stats = limiter._storage.get(rate_limit_key)
+        
+        if window_stats:
+            remaining = max(0, limit_value - window_stats)
+        else:
+            remaining = limit_value
+        
+        # Calculate reset time (next hour)
+        current_time = int(time.time())
+        reset_time = current_time + 3600  # 1 hour from now
+        
+        # Add headers
+        response.headers["X-RateLimit-Limit"] = str(limit_value)
+        response.headers["X-RateLimit-Remaining"] = str(remaining)
+        response.headers["X-RateLimit-Reset"] = str(reset_time)
+        
+    except Exception as e:
+        # If we can't get stats, don't fail the request
+        print(f"[HEADERS] Error adding rate limit headers: {e}")
+    
     return response

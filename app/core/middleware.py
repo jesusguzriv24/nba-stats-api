@@ -7,7 +7,7 @@ from app.models.api_key import APIKey
 from app.models.user import User
 from sqlalchemy import select
 from app.core.database import async_session_maker
-from app.core.rate_limit import set_rate_limit_tier, limiter
+from app.core.rate_limit import set_rate_limit_tier, limiter, RATE_LIMIT_TIERS
 import time
 
 async def rate_limit_tier_middleware(request: Request, call_next):
@@ -63,8 +63,38 @@ async def rate_limit_tier_middleware(request: Request, call_next):
     request.state.rate_limit_tier = tier
     
     response = await call_next(request)
+    
+    try:
+        # Get the rate limit key for this request
+        rate_limit_key = limiter._key_func(request)
+        
+        # Get limit from tier
+        limit_string = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
+        limit_value = int(limit_string.split("/")[0])
+        
+        # Get current count from Redis
+        storage = limiter._storage
+        current_count = storage.get(rate_limit_key)
+        
+        if current_count:
+            remaining = max(0, limit_value - int(current_count))
+        else:
+            remaining = limit_value
+        
+        # Calculate reset time (next hour)
+        current_time = int(time.time())
+        reset_time = current_time + 3600  # 1 hour from now
+        
+        # Add headers to response
+        response.headers["X-RateLimit-Limit"] = str(limit_value)
+        response.headers["X-RateLimit-Remaining"] = str(remaining)
+        response.headers["X-RateLimit-Reset"] = str(reset_time)
+        
+    except Exception as e:
+        # Don't fail the request if we can't add headers
+        print(f"[HEADERS] Error adding rate limit headers: {e}")
+    
     return response
-
 
 async def rate_limit_headers_middleware(request: Request, call_next):
     """

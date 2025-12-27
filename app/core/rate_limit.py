@@ -54,7 +54,7 @@ limiter = Limiter(
     default_limits=["100/hour"],  # Default limit for unauthenticated requests
     storage_uri=redis_url,  # Use in-memory storage (change to Redis in production)
     strategy="fixed-window",
-    headers_enabled=True,
+    headers_enabled=False,
 )
 
 print(f"\nRate limiter initialized with storage: {redis_url}\n")

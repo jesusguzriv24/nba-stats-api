@@ -15,7 +15,7 @@ from app.schemas.datasets import PlayerGameDatasetRow, TeamGameDatasetRow
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
-from app.core.rate_limit import limiter, rate_limit_by_tier
+from app.core.rate_limit import limiter, get_dynamic_rate_limit
 
 router = APIRouter()
 
@@ -24,7 +24,7 @@ router = APIRouter()
 # GET /api/v1/datasets/player-game-stats
 # ---------------------------------------------------------------------------
 @router.get("/player-game-stats", response_model=List[PlayerGameDatasetRow])
-@limiter.limit(rate_limit_by_tier)
+@limiter.limit(get_dynamic_rate_limit)
 async def get_player_game_dataset(
     request: Request,
     season: Optional[int] = Query(None),
@@ -190,7 +190,7 @@ async def get_player_game_dataset(
 # GET /api/v1/datasets/team-game-stats
 # ---------------------------------------------------------------------------
 @router.get("/team-game-stats", response_model=List[TeamGameDatasetRow])
-@limiter.limit(rate_limit_by_tier)
+@limiter.limit(get_dynamic_rate_limit)
 async def get_team_game_dataset(
     request: Request,
     season: Optional[int] = Query(None),

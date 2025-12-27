@@ -15,13 +15,13 @@ from app.schemas.player_game_stats import PlayerGameStatsResponse
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
-from app.core.rate_limit import limiter, rate_limit_by_tier
+from app.core.rate_limit import limiter, get_dynamic_rate_limit
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[PlayerResponse])
-@limiter.limit(rate_limit_by_tier)
+@limiter.limit(get_dynamic_rate_limit)
 async def list_players(
     request: Request,
     team_id: Optional[int] = Query(None),
@@ -52,7 +52,7 @@ async def list_players(
 
 
 @router.get("/{player_id}", response_model=PlayerResponse)
-@limiter.limit(rate_limit_by_tier)
+@limiter.limit(get_dynamic_rate_limit)
 async def get_player(
     request: Request,
     player_id: int, 
@@ -71,7 +71,7 @@ async def get_player(
 
 
 @router.get("/{player_id}/games", response_model=List[PlayerGameStatsResponse])
-@limiter.limit(rate_limit_by_tier)
+@limiter.limit(get_dynamic_rate_limit)
 async def get_player_games(
     request: Request,
     player_id: int,

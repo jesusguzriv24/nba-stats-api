@@ -5,7 +5,10 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from fastapi import Request
 from typing import Optional, Callable
+from contextvars import ContextVar
 
+# Context variable to store rate limit tier for current request
+_rate_limit_tier: ContextVar[str] = ContextVar("rate_limit_tier", default="free")
 
 def get_rate_limit_key(request: Request) -> str:
     """
@@ -51,36 +54,27 @@ RATE_LIMIT_TIERS = {
 
 def get_dynamic_rate_limit() -> str:
     """
-    Returns rate limit string based on tier set by middleware.
+    Returns rate limit based on tier stored in ContextVar.
     
-    NOTE: This function doesn't receive 'request' as parameter because
-    SlowAPI 0.1.9 doesn't support it. Instead, we rely on the middleware
-    setting request.state.rate_limit_tier before this is called.
+    This function is called by SlowAPI WITHOUT arguments.
+    The middleware sets the tier in a ContextVar that this function reads.
     
     Returns:
-        str: Rate limit (e.g., "1000/hour")
+        str: Rate limit string (e.g., "1000/hour")
     """
-    # This will be called by SlowAPI with access to request context
-    # but we can't receive it as a parameter, so we return a lambda
-    # that will be evaluated with the actual request
-    return RATE_LIMIT_TIERS["free"]  # Default fallback
-
-
-# 👇 VERDADERA SOLUCIÓN: Usar lambda con closure
-# Esto crea una función que SlowAPI puede llamar con (request)
-def rate_limit_by_tier(request: Request) -> str:
-    """
-    Dynamic rate limit function called by SlowAPI.
-    
-    Args:
-        request: FastAPI Request object (passed by SlowAPI)
-        
-    Returns:
-        str: Rate limit string
-    """
-    # Get tier from request.state (set by middleware)
-    tier = getattr(request.state, "rate_limit_tier", "free")
+    tier = _rate_limit_tier.get()
     limit = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
-    
     print(f"[RATE LIMIT] Tier: {tier} -> Limit: {limit}")
     return limit
+
+
+def set_rate_limit_tier(tier: str) -> None:
+    """
+    Set the rate limit tier for the current request context.
+    
+    Called by middleware to set the tier before SlowAPI checks limits.
+    
+    Args:
+        tier: Rate limit tier ("free", "pro", or "enterprise")
+    """
+    _rate_limit_tier.set(tier)

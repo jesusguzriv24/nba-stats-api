@@ -7,17 +7,18 @@ from app.models.api_key import APIKey
 from app.models.user import User
 from sqlalchemy import select
 from app.core.database import async_session_maker
+from app.core.rate_limit import set_rate_limit_tier
 
 
 async def rate_limit_tier_middleware(request: Request, call_next):
     """
-    Middleware that sets rate_limit_tier in request.state BEFORE SlowAPI runs.
+    Middleware that sets rate_limit_tier in ContextVar BEFORE SlowAPI runs.
     
     This allows dynamic rate limiting based on user tier without modifying
     the SlowAPI execution order.
     """
     # Default tier
-    request.state.rate_limit_tier = "free"
+    tier = "free"
     
     # Check for API key
     api_key = request.headers.get("X-API-Key")
@@ -48,12 +49,16 @@ async def rate_limit_tier_middleware(request: Request, call_next):
                     user = result.scalar_one_or_none()
                     
                     if user and user.is_active:
-                        request.state.rate_limit_tier = user.rate_limit_tier
-                        print(f"[MIDDLEWARE] Set tier for {user.email}: {user.rate_limit_tier}")
+                        tier = user.rate_limit_tier
+                        print(f"[MIDDLEWARE] Set tier for {user.email}: {tier}")
         
         except Exception as e:
             print(f"[MIDDLEWARE] Error checking API key: {e}")
             # Continue with default tier on error
+    
+    set_rate_limit_tier(tier)
+
+    request.state.rate_limit_tier = tier
     
     response = await call_next(request)
     return response

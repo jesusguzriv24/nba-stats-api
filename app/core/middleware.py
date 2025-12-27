@@ -2,6 +2,7 @@
 Custom middleware for setting rate limit tier before SlowAPI check.
 """
 from fastapi import Request
+from fastapi.responses import Response
 from app.core.security import verify_api_key
 from app.models.api_key import APIKey
 from app.models.user import User
@@ -55,58 +56,83 @@ async def rate_limit_tier_middleware(request: Request, call_next):
     # Set tier in ContextVar
     set_rate_limit_tier(tier)
     request.state.rate_limit_tier = tier
+
+    # Store limit info for later
+    limit_string = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
+    limit_value = int(limit_string.split("/")[0])
+    request.state.rate_limit_max = limit_value
     
-    # Call next middleware/endpoint
+    # Call next middleware/endpoint (SlowAPI will increment counter here)
     response = await call_next(request)
     
-    # 👇 INJECT RATE LIMIT HEADERS MANUALLY
+    # inject headers (after SlowAPI has processed the request)
     try:
-        # Get the rate limit key
-        rate_limit_key = limiter._key_func(request)
-        
-        # Get limit from tier
-        limit_string = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
-        limit_value = int(limit_string.split("/")[0])
-        
-        # Get storage instance
-        storage = limiter._storage
-        
-        # Get current window stats
-        # SlowAPI stores data with a specific key format
-        window_key = f"LIMITER/{rate_limit_key}/{limit_string}"
-        
-        print(f"[DEBUG] Storage type: {type(storage).__name__}")
-        print(f"[DEBUG] Rate limit key: {rate_limit_key}")
-        print(f"[DEBUG] Window key: {window_key}")
-        
-        # Try to get the count
-        try:
-            current_count = storage.get(window_key)
-            print(f"[DEBUG] Current count from storage: {current_count}")
-            
-            if current_count and isinstance(current_count, (int, str)):
-                remaining = max(0, limit_value - int(current_count))
+        # Check if this is a rate limit error response (429)
+        if response.status_code == 429:
+            # Rate limit exceeded - set remaining to 0
+            remaining = 0
+        else:
+            # Use the stats that SlowAPI attached to the request
+            # SlowAPI stores the count in request.state after processing
+            if hasattr(request.state, "view_rate_limit"):
+                # SlowAPI sets this attribute with rate limit info
+                current_count = getattr(request.state.view_rate_limit, "current", 0)
+                remaining = max(0, limit_value - current_count)
+                print(f"[HEADERS] Using SlowAPI stats - Current: {current_count}, Remaining: {remaining}")
             else:
-                remaining = limit_value - 1  # Assume 1 request was made (this one)
+                # Fallback: Try to read directly from Redis
+                rate_limit_key = limiter._key_func(request)
+                storage = limiter._storage
                 
-        except Exception as storage_error:
-            print(f"[DEBUG] Error getting count: {storage_error}")
-            remaining = limit_value - 1
+                # SlowAPI uses limits library internally which stores with this pattern
+                # We need to check the actual keys in Redis
+                window_key = f"{rate_limit_key}:{limit_string}"
+                
+                try:
+                    # Access Redis directly
+                    if hasattr(storage, 'storage'):
+                        redis_client = storage.storage
+                        # Try different key patterns
+                        patterns_to_try = [
+                            window_key,
+                            f"LIMITER/{window_key}",
+                            f"LIMITER/{rate_limit_key}/{limit_string}",
+                            rate_limit_key,
+                        ]
+                        
+                        current_count = None
+                        for pattern in patterns_to_try:
+                            val = redis_client.get(pattern)
+                            if val:
+                                current_count = int(val)
+                                print(f"[HEADERS] Found count {current_count} at key: {pattern}")
+                                break
+                        
+                        if current_count is not None:
+                            remaining = max(0, limit_value - current_count)
+                        else:
+                            print(f"[HEADERS] No count found in Redis, assuming first request")
+                            remaining = limit_value - 1
+                    else:
+                        remaining = limit_value - 1
+                        
+                except Exception as redis_error:
+                    print(f"[HEADERS] Redis read error: {redis_error}")
+                    remaining = limit_value - 1
         
-        # Calculate reset time (next hour)
+        # Calculate reset time (next hour boundary)
         current_time = int(time.time())
-        # Round up to next hour boundary
         reset_time = ((current_time // 3600) + 1) * 3600
-        
-        print(f"[HEADERS] Limit: {limit_value} | Remaining: {remaining} | Reset: {reset_time}")
         
         # Add headers to response
         response.headers["X-RateLimit-Limit"] = str(limit_value)
         response.headers["X-RateLimit-Remaining"] = str(remaining)
         response.headers["X-RateLimit-Reset"] = str(reset_time)
         
+        print(f"[HEADERS] Final - Limit: {limit_value} | Remaining: {remaining} | Reset: {reset_time}")
+        
     except Exception as e:
-        print(f"[HEADERS] Error adding rate limit headers: {type(e).__name__}: {e}")
+        print(f"[HEADERS] Error: {type(e).__name__}: {e}")
     
     return response
 

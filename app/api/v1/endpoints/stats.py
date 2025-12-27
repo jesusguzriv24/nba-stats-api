@@ -12,13 +12,13 @@ from app.schemas.team_stats_rank import TeamStatsRank
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
-from app.core.rate_limit import limiter, get_rate_limit_for_user
+from app.core.rate_limit import limiter, dynamic_rate_limit
 
 router = APIRouter()
 
 
 @router.get("/teams", response_model=List[TeamStatsRank])
-@limiter.limit(get_rate_limit_for_user)
+@limiter.limit(dynamic_rate_limit)
 async def team_rankings(
     request: Request,
     season: int = Query(...),

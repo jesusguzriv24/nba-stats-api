@@ -49,24 +49,41 @@ RATE_LIMIT_TIERS = {
     "enterprise": "10000/hour"  # Enterprise: 10000 requests/hour
 }
 
-
-def get_rate_limit_for_user(request: Request) -> str:
+class DynamicRateLimit:
     """
-    Get rate limit based on user's tier.
+    Callable class that returns dynamic rate limits based on user tier.
     
-    Args:
-        request: FastAPI request object
+    SlowAPI will instantiate this and call it with: callable(request)
+    """
+    
+    def __call__(self, request: Request) -> str:
+        """
+        Returns rate limit string based on authenticated user's tier.
         
-    Returns:
-        str: Rate limit string (e.g., "1000/hour")
-    """
-    # Check if user is authenticated and has a tier
-    if hasattr(request.state, "user") and request.state.user:
-        tier = request.state.user.rate_limit_tier
-        limit = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
-        print(f"[RATE LIMIT] User {request.state.user.email} tier: {tier} -> {limit}")
-        return limit
-    
-    # Default to free tier
-    print(f"[RATE LIMIT] No authenticated user, using default: {RATE_LIMIT_TIERS['free']}")
-    return RATE_LIMIT_TIERS["free"]
+        This is called by SlowAPI BEFORE the endpoint dependencies run,
+        so we need to perform authentication here synchronously.
+        
+        Args:
+            request: FastAPI Request object
+            
+        Returns:
+            str: Rate limit (e.g., "1000/hour")
+        """
+        # IMPORTANT: We can't access request.state.user here because
+        # dependencies haven't run yet. We need to check headers directly.
+        
+        # Try to get user tier from a custom header (set by middleware)
+        user_tier = getattr(request.state, "rate_limit_tier", None)
+        
+        if user_tier:
+            limit = RATE_LIMIT_TIERS.get(user_tier, RATE_LIMIT_TIERS["free"])
+            print(f"[RATE LIMIT] Dynamic tier: {user_tier} -> {limit}")
+            return limit
+        
+        # Default to free tier
+        default = RATE_LIMIT_TIERS["free"]
+        print(f"[RATE LIMIT] No tier found, using default: {default}")
+        return default
+
+# Create singleton instance
+dynamic_rate_limit = DynamicRateLimit()

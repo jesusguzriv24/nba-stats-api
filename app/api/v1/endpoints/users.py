@@ -19,7 +19,7 @@ from app.schemas.api_key import (
     APIKeyResponseWithKey
 )
 
-from app.core.rate_limit import limiter, get_rate_limit_for_user
+from app.core.rate_limit import limiter, dynamic_rate_limit
 
 router = APIRouter()
 
@@ -35,7 +35,7 @@ async def health_check():
 
 
 @router.get("/me", response_model=UserWithKeysResponse)
-@limiter.limit(get_rate_limit_for_user)
+@limiter.limit(dynamic_rate_limit)
 async def get_current_user_profile(
     request: Request,
     user: User = Depends(get_current_user),
@@ -133,7 +133,7 @@ async def create_api_key(
 
 
 @router.get("/me/api-keys", response_model=List[APIKeyResponse])
-@limiter.limit(get_rate_limit_for_user)
+@limiter.limit(dynamic_rate_limit)
 async def list_my_api_keys(
     request: Request,
     user: User = Depends(get_current_user),

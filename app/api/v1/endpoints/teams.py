@@ -15,13 +15,13 @@ from app.schemas.game import GameResponse
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
-from app.core.rate_limit import limiter, get_rate_limit_for_user
+from app.core.rate_limit import limiter, dynamic_rate_limit
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[TeamResponse])
-@limiter.limit(get_rate_limit_for_user)
+@limiter.limit(dynamic_rate_limit)
 async def list_teams(
     request: Request,
     conference: Optional[str] = Query(None),
@@ -53,7 +53,7 @@ async def list_teams(
 
 
 @router.get("/{team_id}", response_model=TeamResponse)
-@limiter.limit(get_rate_limit_for_user)
+@limiter.limit(dynamic_rate_limit)
 async def get_team(
     request: Request,
     team_id: int, 
@@ -68,7 +68,7 @@ async def get_team(
 
 
 @router.get("/{team_id}/games", response_model=List[GameResponse])
-@limiter.limit(get_rate_limit_for_user)
+@limiter.limit(dynamic_rate_limit)
 async def get_team_games(
     request: Request,
     team_id: int,

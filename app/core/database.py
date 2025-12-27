@@ -2,18 +2,22 @@ import os
 import ssl
 from urllib.parse import urlparse
 
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from typing import AsyncGenerator
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import NullPool
 from dotenv import load_dotenv
 
+
 # Load environment variables
 load_dotenv()
+
 
 # --- CONSOLE LOGGING START ---
 print("\n" + "="*60)
 print(" >> INITIALIZING DATABASE CONNECTION")
 print("-" * 60)
+
 
 # 1. Retrieve original URL
 database_url = os.getenv("DATABASE_URL")
@@ -23,15 +27,18 @@ if not database_url:
     print("="*60 + "\n")
     raise ValueError("DATABASE_URL is missing")
 
+
 # 2. Clean the URL: remove '?sslmode=require' parameter if present
 # asyncpg fails if it sees "sslmode" in the URL
 if "?sslmode=" in database_url:
     print(" [-] Cleaning URL parameters (removing sslmode)...")
     database_url = database_url.split("?sslmode=")[0]
 
+
 # 3. Replace scheme for asyncpg
 print(" [-] Updating protocol to postgresql+asyncpg...")
 database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
+
 
 # Decide if SSL should be used (remote) or not (local/docker)
 parsed = urlparse(database_url)
@@ -51,31 +58,53 @@ if use_ssl:
 else:
     print(" [-] Local/Docker DB detected, SSL disabled.")
 
+
 # 5. Configure the engine
 print(" [-] Creating async engine...")
 engine = create_async_engine(
     database_url,
     echo=False,  # Set to False in production to reduce noise
     connect_args=connect_args,
-    poolclass=NullPool,  # Disable pooling for serverless; puedes cambiar si quieres
+    poolclass=NullPool,  # Disable pooling for serverless
 )
 
 print(" >> DATABASE CONFIGURATION COMPLETE")
 print("="*60 + "\n")
 
-# Create the session factory (Session Local)
-AsyncSessionLocal = async_sessionmaker(
-    bind=engine,
-    expire_on_commit=False,
-)
 
 # Base class for models (Tables)
 class Base(DeclarativeBase):
     pass
 
+
+# 👇 CREAR SESSION MAKER (para uso general y middleware)
+async_session_maker = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
+
+
+# 👇 MANTENER COMPATIBILIDAD CON CÓDIGO EXISTENTE
+# Alias para mantener compatibilidad con código que usa AsyncSessionLocal
+AsyncSessionLocal = async_session_maker
+
+
 # Dependency to get DB session in FastAPI endpoints
-async def get_db():
-    async with AsyncSessionLocal() as session:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """
+    FastAPI dependency that provides an async database session.
+    
+    Usage:
+        @app.get("/items")
+        async def get_items(db: AsyncSession = Depends(get_db)):
+            result = await db.execute(select(Item))
+            return result.scalars().all()
+    
+    Yields:
+        AsyncSession: Async database session
+    """
+    async with async_session_maker() as session:
         try:
             yield session
         finally:

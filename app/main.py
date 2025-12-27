@@ -11,6 +11,7 @@ from fastapi.security import HTTPBearer, APIKeyHeader
 from app.core.database import engine, Base
 from app.api.v1.router import api_v1_router
 from app.core.rate_limit import limiter
+from app.core.middleware import rate_limit_tier_middleware
 
 from slowapi.middleware import SlowAPIMiddleware
 
@@ -80,6 +81,7 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.middleware("http")(rate_limit_tier_middleware)
 app.add_middleware(SlowAPIMiddleware)
 
 # --- CORS configuration ---

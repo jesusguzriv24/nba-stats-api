@@ -79,11 +79,16 @@ app = FastAPI(
     """
 )
 
+# --- SlowAPI Configuration ---
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# --- Middleware Stack (ORDER MATTERS!) ---
+# 1. Rate limit tier middleware (sets user tier from API key/JWT)
 app.middleware("http")(rate_limit_tier_middleware)
-app.add_middleware(SlowAPIMiddleware)
-app.middleware("http")(rate_limit_headers_middleware) 
+
+# 2. SlowAPI middleware (checks rate limits using Redis)
+app.add_middleware(SlowAPIMiddleware) 
 
 # --- CORS configuration ---
 # Allowed origins for browser-based clients (e.g. Next.js frontend).

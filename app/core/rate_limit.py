@@ -1,6 +1,7 @@
 """
 Rate limiting configuration and utilities.
 """
+import os
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from fastapi import Request
@@ -36,14 +37,27 @@ def get_rate_limit_key(request: Request) -> str:
     return f"ip:{get_remote_address(request)}"
 
 
+# Get Redis URL from environment
+redis_url = os.getenv("REDIS_URL", "memory://")
+
+# If Redis URL is not configured, use in-memory storage (for local dev)
+if redis_url == "memory://":
+    print("\n" + "="*60)
+    print("⚠️  WARNING: Redis URL not configured")
+    print("   Using in-memory storage (not recommended for production)")
+    print("   Set REDIS_URL environment variable to use Redis")
+    print("="*60 + "\n")
+
 # Initialize limiter
 limiter = Limiter(
     key_func=get_rate_limit_key,
     default_limits=["100/hour"],  # Default limit for unauthenticated requests
-    storage_uri="memory://",  # Use in-memory storage (change to Redis in production)
-    strategy="fixed-window"
+    storage_uri=redis_url,  # Use in-memory storage (change to Redis in production)
+    strategy="fixed-window",
+    headers_enabled=True,
 )
 
+print(f"\nRate limiter initialized with storage: {redis_url}\n")
 
 # Rate limit tiers
 RATE_LIMIT_TIERS = {

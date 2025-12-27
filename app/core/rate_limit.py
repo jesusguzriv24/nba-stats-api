@@ -38,15 +38,35 @@ def get_rate_limit_key(request: Request) -> str:
 
 
 # Get Redis URL from environment
-redis_url = os.getenv("REDIS_URL", "memory://")
+redis_url = os.getenv("REDIS_URL")
 
-# If Redis URL is not configured, use in-memory storage (for local dev)
-if redis_url == "memory://":
-    print("\n" + "="*60)
-    print("⚠️  WARNING: Redis URL not configured")
-    print("   Using in-memory storage (not recommended for production)")
-    print("   Set REDIS_URL environment variable to use Redis")
-    print("="*60 + "\n")
+print("\n" + "="*60)
+print("🔧 RATE LIMITER CONFIGURATION")
+print("="*60)
+
+if not redis_url:
+    print("⚠️  WARNING: REDIS_URL environment variable not set")
+    print("   Using in-memory storage (not suitable for production)")
+    redis_url = "memory://"
+else:
+    print(f"✅ Redis URL found: {redis_url[:30]}...")
+    # Test Redis connection
+    try:
+        import redis
+        # Parse Redis URL
+        if redis_url.startswith("redis://"):
+            client = redis.from_url(redis_url, socket_connect_timeout=5)
+            client.ping()
+            print("✅ Redis connection successful!")
+            client.close()
+        else:
+            print("⚠️  Invalid Redis URL format")
+    except Exception as e:
+        print(f"❌ Redis connection failed: {e}")
+        print("   Falling back to memory storage")
+        redis_url = "memory://"
+
+print("="*60 + "\n")
 
 # Initialize limiter
 limiter = Limiter(

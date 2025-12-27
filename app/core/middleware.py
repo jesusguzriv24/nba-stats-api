@@ -13,9 +13,6 @@ import time
 async def rate_limit_tier_middleware(request: Request, call_next):
     """
     Middleware that sets rate_limit_tier in ContextVar BEFORE SlowAPI runs.
-    
-    This allows dynamic rate limiting based on user tier without modifying
-    the SlowAPI execution order.
     """
     # Default tier
     tier = "free"
@@ -54,36 +51,54 @@ async def rate_limit_tier_middleware(request: Request, call_next):
         
         except Exception as e:
             print(f"[MIDDLEWARE] Error checking API key: {e}")
-            # Continue with default tier on error
     
-    # Setear tier en ContextVar
+    # Set tier in ContextVar
     set_rate_limit_tier(tier)
-    
-    # También mantenerlo en request.state para otros usos
     request.state.rate_limit_tier = tier
     
+    # Call next middleware/endpoint
     response = await call_next(request)
     
+    # 👇 INJECT RATE LIMIT HEADERS MANUALLY
     try:
-        # Get the rate limit key for this request
+        # Get the rate limit key
         rate_limit_key = limiter._key_func(request)
         
         # Get limit from tier
         limit_string = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
         limit_value = int(limit_string.split("/")[0])
         
-        # Get current count from Redis
+        # Get storage instance
         storage = limiter._storage
-        current_count = storage.get(rate_limit_key)
         
-        if current_count:
-            remaining = max(0, limit_value - int(current_count))
-        else:
-            remaining = limit_value
+        # Get current window stats
+        # SlowAPI stores data with a specific key format
+        window_key = f"LIMITER/{rate_limit_key}/{limit_string}"
+        
+        print(f"[DEBUG] Storage type: {type(storage).__name__}")
+        print(f"[DEBUG] Rate limit key: {rate_limit_key}")
+        print(f"[DEBUG] Window key: {window_key}")
+        
+        # Try to get the count
+        try:
+            current_count = storage.get(window_key)
+            print(f"[DEBUG] Current count from storage: {current_count}")
+            
+            if current_count and isinstance(current_count, (int, str)):
+                remaining = max(0, limit_value - int(current_count))
+            else:
+                remaining = limit_value - 1  # Assume 1 request was made (this one)
+                
+        except Exception as storage_error:
+            print(f"[DEBUG] Error getting count: {storage_error}")
+            remaining = limit_value - 1
         
         # Calculate reset time (next hour)
         current_time = int(time.time())
-        reset_time = current_time + 3600  # 1 hour from now
+        # Round up to next hour boundary
+        reset_time = ((current_time // 3600) + 1) * 3600
+        
+        print(f"[HEADERS] Limit: {limit_value} | Remaining: {remaining} | Reset: {reset_time}")
         
         # Add headers to response
         response.headers["X-RateLimit-Limit"] = str(limit_value)
@@ -91,8 +106,7 @@ async def rate_limit_tier_middleware(request: Request, call_next):
         response.headers["X-RateLimit-Reset"] = str(reset_time)
         
     except Exception as e:
-        # Don't fail the request if we can't add headers
-        print(f"[HEADERS] Error adding rate limit headers: {e}")
+        print(f"[HEADERS] Error adding rate limit headers: {type(e).__name__}: {e}")
     
     return response
 

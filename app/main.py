@@ -12,6 +12,8 @@ from app.core.database import engine, Base
 from app.api.v1.router import api_v1_router
 from app.core.rate_limit import limiter
 
+from slowapi.middleware import SlowAPIMiddleware
+
 
 # --- Lifespan events (startup / shutdown) ---
 @asynccontextmanager
@@ -65,19 +67,20 @@ app = FastAPI(
 
     ----------- Rate Limiting -----------
 
-        **Free Tier:** 100 requests/hour  
-        **Pro Tier:** 1,000 requests/hour  
-        **Enterprise Tier:** 10,000 requests/hour
+    **Free Tier:** 100 requests/hour  
+    **Pro Tier:** 1,000 requests/hour  
+    **Enterprise Tier:** 10,000 requests/hour
 
-        Headers de respuesta:
-        - `X-RateLimit-Limit`: 
-        - `X-RateLimit-Remaining`: 
-        - `X-RateLimit-Reset`: Timestamp 
+    Response headers:
+    - `X-RateLimit-Limit`: Total request limit
+    - `X-RateLimit-Remaining`: Remaining requests
+    - `X-RateLimit-Reset`: Unix timestamp when limit resets
     """
 )
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # --- CORS configuration ---
 # Allowed origins for browser-based clients (e.g. Next.js frontend).

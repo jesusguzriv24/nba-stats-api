@@ -155,6 +155,7 @@ async def get_current_user(
     # Use JWT user if available (higher priority)
     if jwt_user:
         print(f"Authenticated via JWT: {jwt_user.email}")
+        request.state.user = jwt_user
         return jwt_user
     
     # Fallback to API Key user if JWT not available

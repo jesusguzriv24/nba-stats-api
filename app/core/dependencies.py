@@ -12,6 +12,7 @@ from sqlalchemy import select
 from app.core.database import get_db
 from app.core.security import verify_api_key
 from app.core.supabase_auth import get_current_user_from_supabase
+from app.core.rate_limiter import rate_limiter
 from app.models.user import User
 from app.models.api_key import APIKey
 
@@ -98,6 +99,15 @@ async def get_current_user_from_api_key(
             )
     
         print(f"Valid API Key for: {user.email}")
+
+        # Check and enforce rate limits for this user
+        rate_limit_info = await rate_limiter.check_rate_limit(
+            request=request,
+            tier=user.rate_limit_tier
+        )
+
+        # Store rate limit info in request.state for headers
+        request.state.rate_limit_info = rate_limit_info
     
         # Increment usage counter for metrics and monitoring
         user.usage_count += 1

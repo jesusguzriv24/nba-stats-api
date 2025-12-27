@@ -138,47 +138,15 @@ async def rate_limit_tier_middleware(request: Request, call_next):
 
 async def rate_limit_headers_middleware(request: Request, call_next):
     """
-    Middleware that adds rate limit headers to responses.
-    
-    Headers added:
-    - X-RateLimit-Limit: Total requests allowed in window
-    - X-RateLimit-Remaining: Remaining requests in current window
-    - X-RateLimit-Reset: Unix timestamp when limit resets
+    Add rate limit headers to response if available in request.state.
     """
     response = await call_next(request)
     
-    # Get rate limit info from SlowAPI's limiter
-    try:
-        # Get the rate limit key for this request
-        rate_limit_key = limiter._key_func(request)
-        
-        # Get tier from request.state
-        tier = getattr(request.state, "rate_limit_tier", "free")
-        
-        # Parse limit from tier (e.g., "100/hour" -> 100)
-        from app.core.rate_limit import RATE_LIMIT_TIERS
-        limit_string = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
-        limit_value = int(limit_string.split("/")[0])
-        
-        # Get current window stats from limiter
-        window_stats = limiter._storage.get(rate_limit_key)
-        
-        if window_stats:
-            remaining = max(0, limit_value - window_stats)
-        else:
-            remaining = limit_value
-        
-        # Calculate reset time (next hour)
-        current_time = int(time.time())
-        reset_time = current_time + 3600  # 1 hour from now
-        
-        # Add headers
-        response.headers["X-RateLimit-Limit"] = str(limit_value)
-        response.headers["X-RateLimit-Remaining"] = str(remaining)
-        response.headers["X-RateLimit-Reset"] = str(reset_time)
-        
-    except Exception as e:
-        # If we can't get stats, don't fail the request
-        print(f"[HEADERS] Error adding rate limit headers: {e}")
+    # Add rate limit headers if they were set by authentication
+    if hasattr(request.state, "rate_limit_info"):
+        info = request.state.rate_limit_info
+        response.headers["X-RateLimit-Limit"] = str(info["limit"])
+        response.headers["X-RateLimit-Remaining"] = str(info["remaining"])
+        response.headers["X-RateLimit-Reset"] = str(info["reset"])
     
     return response

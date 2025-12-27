@@ -19,13 +19,10 @@ from app.schemas.boxscore import GameBoxscoreResponse
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
-from app.core.rate_limit import limiter, get_dynamic_rate_limit
-
 router = APIRouter()
 
 
 @router.get("/", response_model=List[GameResponse])
-@limiter.limit(get_dynamic_rate_limit)
 async def list_games(
     request: Request,
     season: Optional[int] = Query(None),
@@ -99,7 +96,6 @@ async def list_games(
 
 
 @router.get("/{game_id}", response_model=GameResponse)
-@limiter.limit(get_dynamic_rate_limit)
 async def get_game(
     request: Request,
     game_id: int, 
@@ -118,7 +114,6 @@ async def get_game(
 
 
 @router.get("/{game_id}/team-stats", response_model=List[TeamGameStatsResponse])
-@limiter.limit(get_dynamic_rate_limit)
 async def get_game_team_stats(
     request: Request,
     game_id: int, 
@@ -137,7 +132,6 @@ async def get_game_team_stats(
 
 
 @router.get("/{game_id}/player-stats", response_model=List[PlayerGameStatsResponse])
-@limiter.limit(get_dynamic_rate_limit)
 async def get_game_player_stats(
     request: Request,
     game_id: int, 
@@ -159,7 +153,6 @@ async def get_game_player_stats(
 
 
 @router.get("/{game_id}/boxscore", response_model=GameBoxscoreResponse)
-@limiter.limit(get_dynamic_rate_limit)
 async def get_game_boxscore(
     request: Request,
     game_id: int, 

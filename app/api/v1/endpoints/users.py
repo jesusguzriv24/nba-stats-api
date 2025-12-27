@@ -19,8 +19,6 @@ from app.schemas.api_key import (
     APIKeyResponseWithKey
 )
 
-from app.core.rate_limit import limiter, get_dynamic_rate_limit
-
 router = APIRouter()
 
 
@@ -35,7 +33,6 @@ async def health_check():
 
 
 @router.get("/me", response_model=UserWithKeysResponse)
-@limiter.limit(get_dynamic_rate_limit)
 async def get_current_user_profile(
     request: Request,
     user: User = Depends(get_current_user),
@@ -72,7 +69,6 @@ async def get_current_user_profile(
 
 
 @router.post("/me/api-keys", response_model=APIKeyResponseWithKey, status_code=status.HTTP_201_CREATED)
-@limiter.limit("10/hour")
 async def create_api_key(
     request: Request,
     data: APIKeyCreate,
@@ -133,7 +129,6 @@ async def create_api_key(
 
 
 @router.get("/me/api-keys", response_model=List[APIKeyResponse])
-@limiter.limit(get_dynamic_rate_limit)
 async def list_my_api_keys(
     request: Request,
     user: User = Depends(get_current_user),
@@ -162,7 +157,6 @@ async def list_my_api_keys(
 
 
 @router.delete("/me/api-keys/{key_id}", status_code=status.HTTP_204_NO_CONTENT)
-@limiter.limit("20/hour")
 async def revoke_api_key(
     request: Request,
     key_id: int,

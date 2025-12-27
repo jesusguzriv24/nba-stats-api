@@ -49,41 +49,38 @@ RATE_LIMIT_TIERS = {
     "enterprise": "10000/hour"  # Enterprise: 10000 requests/hour
 }
 
-class DynamicRateLimit:
+def get_dynamic_rate_limit() -> str:
     """
-    Callable class that returns dynamic rate limits based on user tier.
+    Returns rate limit string based on tier set by middleware.
     
-    SlowAPI will instantiate this and call it with: callable(request)
+    NOTE: This function doesn't receive 'request' as parameter because
+    SlowAPI 0.1.9 doesn't support it. Instead, we rely on the middleware
+    setting request.state.rate_limit_tier before this is called.
+    
+    Returns:
+        str: Rate limit (e.g., "1000/hour")
     """
-    
-    def __call__(self, request: Request) -> str:
-        """
-        Returns rate limit string based on authenticated user's tier.
-        
-        This is called by SlowAPI BEFORE the endpoint dependencies run,
-        so we need to perform authentication here synchronously.
-        
-        Args:
-            request: FastAPI Request object
-            
-        Returns:
-            str: Rate limit (e.g., "1000/hour")
-        """
-        # IMPORTANT: We can't access request.state.user here because
-        # dependencies haven't run yet. We need to check headers directly.
-        
-        # Try to get user tier from a custom header (set by middleware)
-        user_tier = getattr(request.state, "rate_limit_tier", None)
-        
-        if user_tier:
-            limit = RATE_LIMIT_TIERS.get(user_tier, RATE_LIMIT_TIERS["free"])
-            print(f"[RATE LIMIT] Dynamic tier: {user_tier} -> {limit}")
-            return limit
-        
-        # Default to free tier
-        default = RATE_LIMIT_TIERS["free"]
-        print(f"[RATE LIMIT] No tier found, using default: {default}")
-        return default
+    # This will be called by SlowAPI with access to request context
+    # but we can't receive it as a parameter, so we return a lambda
+    # that will be evaluated with the actual request
+    return RATE_LIMIT_TIERS["free"]  # Default fallback
 
-# Create singleton instance
-dynamic_rate_limit = DynamicRateLimit()
+
+# 👇 VERDADERA SOLUCIÓN: Usar lambda con closure
+# Esto crea una función que SlowAPI puede llamar con (request)
+def rate_limit_by_tier(request: Request) -> str:
+    """
+    Dynamic rate limit function called by SlowAPI.
+    
+    Args:
+        request: FastAPI Request object (passed by SlowAPI)
+        
+    Returns:
+        str: Rate limit string
+    """
+    # Get tier from request.state (set by middleware)
+    tier = getattr(request.state, "rate_limit_tier", "free")
+    limit = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
+    
+    print(f"[RATE LIMIT] Tier: {tier} -> Limit: {limit}")
+    return limit

@@ -19,13 +19,13 @@ from app.schemas.boxscore import GameBoxscoreResponse
 from app.core.dependencies import get_current_user
 from app.models.user import User
 
-from app.core.rate_limit import limiter, dynamic_rate_limit
+from app.core.rate_limit import limiter, rate_limit_by_tier
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[GameResponse])
-@limiter.limit(dynamic_rate_limit)
+@limiter.limit(rate_limit_by_tier)
 async def list_games(
     request: Request,
     season: Optional[int] = Query(None),
@@ -99,7 +99,7 @@ async def list_games(
 
 
 @router.get("/{game_id}", response_model=GameResponse)
-@limiter.limit(dynamic_rate_limit)
+@limiter.limit(rate_limit_by_tier)
 async def get_game(
     request: Request,
     game_id: int, 
@@ -118,7 +118,7 @@ async def get_game(
 
 
 @router.get("/{game_id}/team-stats", response_model=List[TeamGameStatsResponse])
-@limiter.limit(dynamic_rate_limit)
+@limiter.limit(rate_limit_by_tier)
 async def get_game_team_stats(
     request: Request,
     game_id: int, 
@@ -137,7 +137,7 @@ async def get_game_team_stats(
 
 
 @router.get("/{game_id}/player-stats", response_model=List[PlayerGameStatsResponse])
-@limiter.limit(dynamic_rate_limit)
+@limiter.limit(rate_limit_by_tier)
 async def get_game_player_stats(
     request: Request,
     game_id: int, 
@@ -159,7 +159,7 @@ async def get_game_player_stats(
 
 
 @router.get("/{game_id}/boxscore", response_model=GameBoxscoreResponse)
-@limiter.limit(dynamic_rate_limit)
+@limiter.limit(rate_limit_by_tier)
 async def get_game_boxscore(
     request: Request,
     game_id: int, 

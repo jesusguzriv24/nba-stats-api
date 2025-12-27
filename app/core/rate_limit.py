@@ -4,7 +4,7 @@ Rate limiting configuration and utilities.
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from fastapi import Request
-from typing import Optional
+from typing import Optional, Callable
 
 
 def get_rate_limit_key(request: Request) -> str:
@@ -50,7 +50,7 @@ RATE_LIMIT_TIERS = {
 }
 
 
-def get_rate_limit_for_user(request: Request) -> Optional[str]:
+def get_rate_limit_for_user(request: Request) -> str:
     """
     Get rate limit based on user's tier.
     
@@ -63,7 +63,10 @@ def get_rate_limit_for_user(request: Request) -> Optional[str]:
     # Check if user is authenticated and has a tier
     if hasattr(request.state, "user") and request.state.user:
         tier = request.state.user.rate_limit_tier
-        return RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
+        limit = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
+        print(f"[RATE LIMIT] User {request.state.user.email} tier: {tier} -> {limit}")
+        return limit
     
     # Default to free tier
+    print(f"[RATE LIMIT] No authenticated user, using default: {RATE_LIMIT_TIERS['free']}")
     return RATE_LIMIT_TIERS["free"]

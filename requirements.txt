@@ -59,7 +59,6 @@ pytest-asyncio==0.23.0
 #supabase==2.4.2
 
 # Rate Limiting & Caching
-slowapi==0.1.9
 redis==4.6.0
 
 # ============================================

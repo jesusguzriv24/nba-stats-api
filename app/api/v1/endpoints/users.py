@@ -1,13 +1,16 @@
 """
 Endpoints for user profile and API key management.
+
+Updated to work with the new subscription system.
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from datetime import datetime
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, get_active_user_subscription
 from app.core.supabase_auth import get_current_user_from_supabase
 from app.core.security import generate_api_key
 from app.models.user import User
@@ -16,7 +19,7 @@ from app.schemas.user import UserResponse, UserWithKeysResponse
 from app.schemas.api_key import (
     APIKeyCreate,
     APIKeyResponse,
-    APIKeyResponseWithKey
+    APIKeyCreateResponse
 )
 
 router = APIRouter()
@@ -27,7 +30,10 @@ async def health_check():
     """
     Health check endpoint - no authentication required.
     
-    Use this to verify the API is running and responding.
+    Use this to verify the user service is running and responding.
+    
+    Returns:
+        dict: Health status
     """
     return {"status": "healthy", "message": "User service is running"}
 
@@ -41,14 +47,15 @@ async def get_current_user_profile(
     """
     Get the authenticated user's profile information.
     
-    Returns the current user's profile data including account details and
-    the count of API keys they own.
+    Returns the current user's profile data including account details,
+    the count of API keys they own, and their current subscription plan.
     
     Requires:
-        - Valid Supabase JWT in Authorization header
+        - Valid Supabase JWT in Authorization header OR
+        - Valid API key in X-API-Key header
     
     Returns:
-        UserWithKeysResponse: User profile with API key count
+        UserWithKeysResponse: User profile with API key count and subscription
     """
     # Count total API keys owned by this user
     result = await db.execute(
@@ -56,19 +63,22 @@ async def get_current_user_profile(
     )
     api_keys_count = result.scalar()
     
+    # Get active subscription
+    subscription, plan = await get_active_user_subscription(user.id, db)
+    
     return UserWithKeysResponse(
         id=user.id,
         email=user.email,
         role=user.role,
         is_active=user.is_active,
-        rate_limit_tier=user.rate_limit_tier,
-        usage_count=user.usage_count,
         created_at=user.created_at,
-        api_keys_count=api_keys_count
+        api_keys_count=api_keys_count,
+        current_plan=plan.plan_name if plan else "free",
+        subscription_status=subscription.status if subscription else None
     )
 
 
-@router.post("/me/api-keys", response_model=APIKeyResponseWithKey, status_code=status.HTTP_201_CREATED)
+@router.post("/me/api-keys", response_model=APIKeyCreateResponse, status_code=status.HTTP_201_CREATED)
 async def create_api_key(
     request: Request,
     data: APIKeyCreate,
@@ -82,12 +92,19 @@ async def create_api_key(
     Store it securely - you will not be able to retrieve or view it again after this response.
     If lost, the key must be revoked and a new one created.
     
+    The API key inherits the rate limit from the user's current subscription plan.
+    If the user upgrades/downgrades their subscription, all their API keys
+    will automatically use the new rate limits.
+    
     Requires:
         - Valid Supabase JWT in Authorization header
         - Active user account
     
+    Args:
+        data (APIKeyCreate): API key creation data (name, optional settings)
+    
     Returns:
-        APIKeyResponseWithKey: New API key with complete key value
+        APIKeyCreateResponse: New API key with complete key value
     """
     # Verify that the user account is active
     if not user.is_active:
@@ -95,6 +112,10 @@ async def create_api_key(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User account is inactive"
         )
+    
+    # Get user's current subscription plan
+    subscription, plan = await get_active_user_subscription(user.id, db)
+    plan_name = plan.plan_name if plan else "free"
     
     # Generate cryptographically secure API key
     key_data = generate_api_key()
@@ -106,25 +127,32 @@ async def create_api_key(
         name=data.name,
         last_chars=key_data["last_chars"],
         is_active=True,
-        rate_limit_plan=user.rate_limit_tier  # Inherit user's rate limiting plan
+        rate_limit_plan=plan_name,  # Set to user's current plan
+        scopes=data.scopes,
+        allowed_ips=data.allowed_ips,
+        expires_at=data.expires_at
     )
     
     db.add(new_api_key)
     await db.commit()
     await db.refresh(new_api_key)
     
-    print(f"API Key created: {data.name} for {user.email} (ID: {new_api_key.id})")
+    print(f"[API KEY] Created '{data.name}' for {user.email} (ID: {new_api_key.id}) - Plan: {plan_name}")
     
     # Return response with complete key (shown only this time)
-    return APIKeyResponseWithKey(
+    return APIKeyCreateResponse(
         id=new_api_key.id,
+        user_id=new_api_key.user_id,
         name=new_api_key.name,
         last_chars=new_api_key.last_chars,
         is_active=new_api_key.is_active,
         rate_limit_plan=new_api_key.rate_limit_plan,
+        scopes=new_api_key.scopes,
         created_at=new_api_key.created_at,
+        last_used_at=new_api_key.last_used_at,
         revoked_at=new_api_key.revoked_at,
-        key=key_data["key"]  #Complete key only returned here
+        expires_at=new_api_key.expires_at,
+        api_key=key_data["key"]  # Complete key only returned here
     )
 
 
@@ -141,7 +169,8 @@ async def list_my_api_keys(
     displayed - only the last 8 characters are shown for security purposes.
     
     Requires:
-        - Valid Supabase JWT in Authorization header
+        - Valid Supabase JWT in Authorization header OR
+        - Valid API key in X-API-Key header
     
     Returns:
         List[APIKeyResponse]: List of user's API keys with metadata
@@ -174,7 +203,7 @@ async def revoke_api_key(
         - The API key must belong to the authenticated user
     
     Args:
-        key_id: ID of the API key to revoke
+        key_id (int): ID of the API key to revoke
     
     Raises:
         HTTPException 404: If the API key is not found or doesn't belong to the user
@@ -195,12 +224,11 @@ async def revoke_api_key(
         )
     
     # Mark key as revoked with timestamp
-    from datetime import datetime, timezone
     api_key.is_active = False
-    api_key.revoked_at = datetime.now(timezone.utc)
+    api_key.revoked_at = datetime.now()
     
     await db.commit()
     
-    print(f"API Key revoked: {api_key.name} (ID: {api_key.id})")
+    print(f"[API KEY] Revoked '{api_key.name}' (ID: {api_key.id}) for user {user.email}")
     
     return None

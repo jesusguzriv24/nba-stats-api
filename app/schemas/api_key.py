@@ -1,66 +1,98 @@
 """
-Pydantic schemas for API Key models and validation.
+Pydantic schemas for APIKey model.
+
+Updated to work with the new subscription system.
 """
+from pydantic import BaseModel, Field, validator
+from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, Field
+
+
+class APIKeyBase(BaseModel):
+    """
+    Base schema for API key with common fields.
+    """
+    name: str = Field(..., max_length=100)
+    scopes: Optional[str] = Field(None, max_length=500)
+    allowed_ips: Optional[str] = Field(None, max_length=500)
+    expires_at: Optional[datetime] = None
 
 
 class APIKeyCreate(BaseModel):
     """
     Schema for creating a new API key.
     
-    Attributes:
-        name: Human-readable name for the API key for organizational purposes
+    Only requires name and optional security settings.
+    The rate_limit_plan is automatically set based on user's subscription.
     """
-    name: str = Field(
-        ...,
-        min_length=1,
-        max_length=100,
-        description="Descriptive name for the API key (e.g., 'Production API', 'Mobile App')",
-        examples=["NBA Props Analyzer", "Production API", "Dev Environment"]
-    )
+    name: str = Field(..., max_length=100, description="Human-readable name for this API key")
+    scopes: Optional[str] = Field(None, max_length=500, description="Comma-separated list of scopes/permissions")
+    allowed_ips: Optional[str] = Field(None, max_length=500, description="Comma-separated list of allowed IP addresses")
+    expires_at: Optional[datetime] = Field(None, description="Optional expiration date for temporary keys")
+
+
+class APIKeyUpdate(BaseModel):
+    """
+    Schema for updating API key (all fields optional).
+    
+    Allows updating name, status, custom rate limits, and security settings.
+    """
+    name: Optional[str] = Field(None, max_length=100)
+    is_active: Optional[bool] = None
+    custom_rate_limit_per_minute: Optional[int] = Field(None, ge=0)
+    custom_rate_limit_per_hour: Optional[int] = Field(None, ge=0)
+    custom_rate_limit_per_day: Optional[int] = Field(None, ge=0)
+    scopes: Optional[str] = None
+    allowed_ips: Optional[str] = None
+    expires_at: Optional[datetime] = None
 
 
 class APIKeyResponse(BaseModel):
     """
-    Schema for API key response (without exposing the full key).
+    Schema for API key response (without sensitive data).
     
-    This schema is used for all API key queries and responses. The full key
-    is never shown after the initial creation for security reasons.
-    
-    Attributes:
-        id: Unique API key identifier
-        name: Human-readable name of the key
-        last_chars: Last 8 characters of the key (for identification)
-        is_active: Whether the key is currently active
-        rate_limit_plan: Associated rate limiting tier
-        created_at: When the key was created
-        revoked_at: When the key was revoked (None if still active)
+    Never includes the actual API key - only the last 8 characters
+    are shown for identification purposes.
     """
     id: int
+    user_id: int
     name: str
     last_chars: str
     is_active: bool
     rate_limit_plan: str
+    custom_rate_limit_per_minute: Optional[int]
+    custom_rate_limit_per_hour: Optional[int]
+    custom_rate_limit_per_day: Optional[int]
+    scopes: Optional[str]
     created_at: datetime
-    revoked_at: datetime | None = None
-    
+    last_used_at: Optional[datetime]
+    revoked_at: Optional[datetime]
+    expires_at: Optional[datetime]
+
     class Config:
         from_attributes = True
 
 
-class APIKeyResponseWithKey(APIKeyResponse):
+class APIKeyCreateResponse(APIKeyResponse):
     """
-    Schema for API key response that includes the full key (creation response only).
+    Schema for API key creation response (includes the actual key once).
     
-    WARNING: The complete API key is shown only once during creation. The user is
-    responsible for securely storing it. Once the user navigates away or the response
-    is closed, the full key will never be displayed again.
-    
-    Attributes:
-        key: The complete API key (shown only during creation)
+    IMPORTANT: This is the ONLY time the complete API key is returned.
+    The key should be displayed to the user immediately and they should
+    store it securely. It cannot be retrieved again.
     """
-    key: str = Field(
-        ...,
-        description="⚠️ Complete API key. Store it securely - it will never be shown again."
-    )
+    api_key: str = Field(..., description="Complete API key - SHOWN ONLY ONCE")
+
+
+class APIKeyWithUsage(APIKeyResponse):
+    """
+    Schema for API key with current usage statistics.
+    
+    Includes real-time usage counts for monitoring purposes.
+    """
+    usage_today: int
+    usage_this_hour: int
+    usage_this_minute: int
+
+    class Config:
+        from_attributes = True

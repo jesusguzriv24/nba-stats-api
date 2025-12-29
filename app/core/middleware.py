@@ -1,152 +1,210 @@
 """
-Custom middleware for setting rate limit tier before SlowAPI check.
+Custom middleware for rate limiting and request tracking.
+
+This middleware integrates with the subscription system and rate limiter
+to enforce limits and add appropriate headers to responses.
 """
 from fastapi import Request
 from fastapi.responses import Response
-from app.core.security import verify_api_key
-from app.models.api_key import APIKey
-from app.models.user import User
-from sqlalchemy import select
-from app.core.database import async_session_maker
-from app.core.rate_limit import set_rate_limit_tier, limiter, RATE_LIMIT_TIERS
 import time
+from datetime import datetime
 
-async def rate_limit_tier_middleware(request: Request, call_next):
-    """
-    Middleware that sets rate_limit_tier in ContextVar BEFORE SlowAPI runs.
-    """
-    # Default tier
-    tier = "free"
-    
-    # Check for API key
-    api_key = request.headers.get("X-API-Key")
-    
-    if api_key:
-        try:
-            async with async_session_maker() as db:
-                # Query active API keys
-                result = await db.execute(
-                    select(APIKey)
-                    .where(APIKey.is_active == True)
-                    .where(APIKey.revoked_at == None)
-                )
-                active_keys = result.scalars().all()
-                
-                # Find matching key
-                matched_key = None
-                for db_key in active_keys:
-                    if verify_api_key(api_key, db_key.key_hash):
-                        matched_key = db_key
-                        break
-                
-                if matched_key:
-                    # Get user and their tier
-                    result = await db.execute(
-                        select(User).where(User.id == matched_key.user_id)
-                    )
-                    user = result.scalar_one_or_none()
-                    
-                    if user and user.is_active:
-                        tier = user.rate_limit_tier
-                        print(f"[MIDDLEWARE] Set tier for {user.email}: {tier}")
-        
-        except Exception as e:
-            print(f"[MIDDLEWARE] Error checking API key: {e}")
-    
-    # Set tier in ContextVar
-    set_rate_limit_tier(tier)
-    request.state.rate_limit_tier = tier
-
-    # Store limit info for later
-    limit_string = RATE_LIMIT_TIERS.get(tier, RATE_LIMIT_TIERS["free"])
-    limit_value = int(limit_string.split("/")[0])
-    request.state.rate_limit_max = limit_value
-    
-    # Call next middleware/endpoint (SlowAPI will increment counter here)
-    response = await call_next(request)
-    
-    # inject headers (after SlowAPI has processed the request)
-    try:
-        # Check if this is a rate limit error response (429)
-        if response.status_code == 429:
-            # Rate limit exceeded - set remaining to 0
-            remaining = 0
-        else:
-            # Use the stats that SlowAPI attached to the request
-            # SlowAPI stores the count in request.state after processing
-            if hasattr(request.state, "view_rate_limit"):
-                # SlowAPI sets this attribute with rate limit info
-                current_count = getattr(request.state.view_rate_limit, "current", 0)
-                remaining = max(0, limit_value - current_count)
-                print(f"[HEADERS] Using SlowAPI stats - Current: {current_count}, Remaining: {remaining}")
-            else:
-                # Fallback: Try to read directly from Redis
-                rate_limit_key = limiter._key_func(request)
-                storage = limiter._storage
-                
-                # SlowAPI uses limits library internally which stores with this pattern
-                # We need to check the actual keys in Redis
-                window_key = f"{rate_limit_key}:{limit_string}"
-                
-                try:
-                    # Access Redis directly
-                    if hasattr(storage, 'storage'):
-                        redis_client = storage.storage
-                        # Try different key patterns
-                        patterns_to_try = [
-                            window_key,
-                            f"LIMITER/{window_key}",
-                            f"LIMITER/{rate_limit_key}/{limit_string}",
-                            rate_limit_key,
-                        ]
-                        
-                        current_count = None
-                        for pattern in patterns_to_try:
-                            val = redis_client.get(pattern)
-                            if val:
-                                current_count = int(val)
-                                print(f"[HEADERS] Found count {current_count} at key: {pattern}")
-                                break
-                        
-                        if current_count is not None:
-                            remaining = max(0, limit_value - current_count)
-                        else:
-                            print(f"[HEADERS] No count found in Redis, assuming first request")
-                            remaining = limit_value - 1
-                    else:
-                        remaining = limit_value - 1
-                        
-                except Exception as redis_error:
-                    print(f"[HEADERS] Redis read error: {redis_error}")
-                    remaining = limit_value - 1
-        
-        # Calculate reset time (next hour boundary)
-        current_time = int(time.time())
-        reset_time = ((current_time // 3600) + 1) * 3600
-        
-        # Add headers to response
-        response.headers["X-RateLimit-Limit"] = str(limit_value)
-        response.headers["X-RateLimit-Remaining"] = str(remaining)
-        response.headers["X-RateLimit-Reset"] = str(reset_time)
-        
-        print(f"[HEADERS] Final - Limit: {limit_value} | Remaining: {remaining} | Reset: {reset_time}")
-        
-    except Exception as e:
-        print(f"[HEADERS] Error: {type(e).__name__}: {e}")
-    
-    return response
 
 async def rate_limit_headers_middleware(request: Request, call_next):
     """
-    Add rate limit headers to response if available in request.state.
+    Middleware to add rate limit headers to all API responses.
+    
+    This middleware runs after the request has been processed and adds
+    standardized rate limit headers to the response. These headers inform
+    clients about their current rate limit status.
+    
+    Headers added:
+    - X-RateLimit-Limit-Minute: Maximum requests per minute
+    - X-RateLimit-Limit-Hour: Maximum requests per hour  
+    - X-RateLimit-Limit-Day: Maximum requests per day
+    - X-RateLimit-Remaining-Minute: Remaining requests this minute
+    - X-RateLimit-Remaining-Hour: Remaining requests this hour
+    - X-RateLimit-Remaining-Day: Remaining requests this day
+    - X-RateLimit-Reset-Minute: Unix timestamp when minute limit resets
+    - X-RateLimit-Reset-Hour: Unix timestamp when hour limit resets
+    - X-RateLimit-Reset-Day: Unix timestamp when day limit resets
+    
+    Args:
+        request (Request): Incoming FastAPI request
+        call_next: Next middleware/endpoint in chain
+        
+    Returns:
+        Response: Response with rate limit headers added
     """
+    # Process the request through the rest of the chain
     response = await call_next(request)
     
-    # Add rate limit headers if they were set by authentication
-    if hasattr(request.state, "rate_limit_info"):
-        info = request.state.rate_limit_info
-        response.headers["X-RateLimit-Limit"] = str(info["limit"])
-        response.headers["X-RateLimit-Remaining"] = str(info["remaining"])
-        response.headers["X-RateLimit-Reset"] = str(info["reset"])
+    try:
+        # Check if rate limit info was stored by authentication dependency
+        if hasattr(request.state, "rate_limit_info"):
+            info = request.state.rate_limit_info
+            
+            # Add minute limits
+            response.headers["X-RateLimit-Limit-Minute"] = str(info.get("limit_minute", 0))
+            response.headers["X-RateLimit-Remaining-Minute"] = str(info.get("remaining_minute", 0))
+            response.headers["X-RateLimit-Reset-Minute"] = str(info.get("reset_minute", 0))
+            
+            # Add hour limits
+            response.headers["X-RateLimit-Limit-Hour"] = str(info.get("limit_hour", 0))
+            response.headers["X-RateLimit-Remaining-Hour"] = str(info.get("remaining_hour", 0))
+            response.headers["X-RateLimit-Reset-Hour"] = str(info.get("reset_hour", 0))
+            
+            # Add day limits
+            response.headers["X-RateLimit-Limit-Day"] = str(info.get("limit_day", 0))
+            response.headers["X-RateLimit-Remaining-Day"] = str(info.get("remaining_day", 0))
+            response.headers["X-RateLimit-Reset-Day"] = str(info.get("reset_day", 0))
+            
+            print(f"[HEADERS] Added rate limit headers - Minute: {info.get('remaining_minute')}/{info.get('limit_minute')}")
+    
+    except Exception as e:
+        # Don't fail the request if header addition fails
+        print(f"[HEADERS] Error adding rate limit headers: {e}")
+    
+    return response
+
+
+async def usage_logging_middleware(request: Request, call_next):
+    """
+    Middleware to log API usage for analytics and monitoring.
+    
+    This middleware tracks every API request and logs it to the database.
+    It captures request details, response status, and performance metrics.
+    
+    Logged information:
+    - User ID and API key ID (if authenticated)
+    - Endpoint and HTTP method
+    - Response status code and time
+    - Client IP address and user agent
+    - Whether request was rate limited
+    
+    This data is used for:
+    - Usage analytics and reporting
+    - Rate limit enforcement auditing
+    - Performance monitoring
+    - Security analysis
+    
+    Args:
+        request (Request): Incoming FastAPI request
+        call_next: Next middleware/endpoint in chain
+        
+    Returns:
+        Response: Original response from endpoint
+    """
+    # Record start time for response time calculation
+    start_time = time.time()
+    
+    # Extract request metadata
+    endpoint = request.url.path
+    http_method = request.method
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    
+    # Initialize variables for user/api_key (set by authentication)
+    user_id = None
+    api_key_id = None
+    rate_limit_plan = None
+    rate_limited = False
+    
+    # Process the request
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        error_message = None
+        
+        # Check if this was a rate limit error
+        if status_code == 429:
+            rate_limited = True
+        
+    except Exception as e:
+        # If request failed with exception, log it
+        status_code = 500
+        error_message = str(e)
+        # Re-raise the exception after logging
+        raise
+    
+    finally:
+        # Calculate response time
+        response_time_ms = int((time.time() - start_time) * 1000)
+        
+        # Extract user and API key info if available
+        if hasattr(request.state, "user"):
+            user_id = request.state.user.id
+        
+        if hasattr(request.state, "api_key"):
+            api_key_id = request.state.api_key.id
+        
+        if hasattr(request.state, "subscription_plan"):
+            rate_limit_plan = request.state.subscription_plan.plan_name
+        
+        # Log the usage (async, don't wait for completion)
+        if user_id:
+            try:
+                # Import here to avoid circular imports
+                from app.core.dependencies import log_api_usage
+                from app.core.database import async_session_maker
+                
+                # Create a new DB session for logging
+                async with async_session_maker() as db:
+                    await log_api_usage(
+                        db=db,
+                        user_id=user_id,
+                        api_key_id=api_key_id,
+                        endpoint=endpoint,
+                        http_method=http_method,
+                        status_code=status_code,
+                        response_time_ms=response_time_ms,
+                        ip_address=ip_address,
+                        user_agent=user_agent,
+                        request_id=None,  # Can add request ID tracking if needed
+                        rate_limit_plan=rate_limit_plan,
+                        rate_limited=rate_limited,
+                        error_message=error_message
+                    )
+            except Exception as log_error:
+                # Don't fail the request if logging fails
+                print(f"[ERROR] Failed to log API usage: {log_error}")
+    
+    return response
+
+
+async def request_id_middleware(request: Request, call_next):
+    """
+    Middleware to add unique request ID to each request.
+    
+    Generates a unique identifier for each request that can be used for:
+    - Request tracking across logs
+    - Debugging distributed systems
+    - Correlating client issues with server logs
+    
+    The request ID is:
+    - Stored in request.state.request_id
+    - Added to response headers as X-Request-ID
+    - Can be logged in usage logs for tracking
+    
+    Args:
+        request (Request): Incoming FastAPI request
+        call_next: Next middleware/endpoint in chain
+        
+    Returns:
+        Response: Response with X-Request-ID header
+    """
+    import uuid
+    
+    # Generate unique request ID
+    request_id = str(uuid.uuid4())
+    
+    # Store in request state for access in endpoints
+    request.state.request_id = request_id
+    
+    # Process request
+    response = await call_next(request)
+    
+    # Add request ID to response headers
+    response.headers["X-Request-ID"] = request_id
     
     return response

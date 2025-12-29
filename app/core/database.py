@@ -77,7 +77,7 @@ class Base(DeclarativeBase):
     pass
 
 
-# 👇 CREAR SESSION MAKER (para uso general y middleware)
+# CREAR SESSION MAKER (para uso general y middleware)
 async_session_maker = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
@@ -85,7 +85,7 @@ async_session_maker = async_sessionmaker(
 )
 
 
-# 👇 MANTENER COMPATIBILIDAD CON CÓDIGO EXISTENTE
+# MANTENER COMPATIBILIDAD CON CÓDIGO EXISTENTE
 # Alias para mantener compatibilidad con código que usa AsyncSessionLocal
 AsyncSessionLocal = async_session_maker
 

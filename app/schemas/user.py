@@ -1,46 +1,81 @@
 """
-Pydantic schemas for User models and validation.
+Pydantic schemas for User model.
+
+Updated to work with the new subscription system.
 """
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, List
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
+
+from app.schemas.api_key import APIKeyResponse
+from app.schemas.user_subscription import UserSubscriptionResponse
 
 
-class UserResponse(BaseModel):
+class UserBase(BaseModel):
     """
-    Schema for user response data.
+    Base schema for user with common fields.
+    """
+    email: EmailStr
+    role: str = Field(default="user", max_length=50)
+    is_active: bool = True
+
+
+class UserCreate(UserBase):
+    """
+    Schema for creating a new user (via webhook from Supabase).
     
-    This schema is used for all user queries and API responses. It contains
-    public user information without sensitive data.
-    
-    Attributes:
-        id: Unique user identifier
-        email: User email address (validated format)
-        role: User role ('user', 'admin', etc.)
-        is_active: Account status
-        rate_limit_tier: Associated rate limiting plan ('free', 'pro', 'enterprise')
-        usage_count: Total API usage counter
-        created_at: Account creation timestamp
+    This is used when synchronizing users from Supabase Auth
+    to our local database.
+    """
+    supabase_user_id: str = Field(..., max_length=255)
+
+
+class UserUpdate(BaseModel):
+    """
+    Schema for updating user (all fields optional).
+    """
+    email: Optional[EmailStr] = None
+    role: Optional[str] = Field(None, max_length=50)
+    is_active: Optional[bool] = None
+
+
+class UserResponse(UserBase):
+    """
+    Schema for user response (basic info).
     """
     id: int
-    email: EmailStr
-    role: str
-    is_active: bool
-    rate_limit_tier: str
-    usage_count: int
+    supabase_user_id: str
     created_at: datetime
-    
+    updated_at: datetime
+
     class Config:
         from_attributes = True
 
 
 class UserWithKeysResponse(UserResponse):
     """
-    Schema for user response with API key count.
+    Schema for user with API key count and subscription info.
     
-    Extends UserResponse with additional metadata about the user's API keys.
-    Useful for endpoints that need to show key management information.
-    
-    Attributes:
-        api_keys_count: Total number of API keys owned by the user
+    This is returned from the /me endpoint to show the user
+    their profile along with API key count and current plan.
     """
     api_keys_count: int
+    current_plan: str  # Plan name (free, premium, pro)
+    subscription_status: Optional[str] = None  # active, cancelled, expired, etc.
+    
+    class Config:
+        from_attributes = True
+
+
+class UserDetailResponse(UserResponse):
+    """
+    Detailed user response with relationships (admin only).
+    
+    This includes full details of all API keys and subscriptions.
+    Should only be used for admin endpoints.
+    """
+    api_keys: List["APIKeyResponse"] = []
+    subscriptions: List["UserSubscriptionResponse"] = []
+
+    class Config:
+        from_attributes = True

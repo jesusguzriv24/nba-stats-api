@@ -72,6 +72,8 @@ async def get_current_user_profile(
         role=user.role,
         is_active=user.is_active,
         created_at=user.created_at,
+        updated_at=user.updated_at,  # <-- AGREGAR ESTA LÍNEA
+        supabase_user_id=user.supabase_user_id, # <-- AGREGAR ESTA LÍNEA
         api_keys_count=api_keys_count,
         current_plan=plan.plan_name if plan else "free",
         subscription_status=subscription.status if subscription else None

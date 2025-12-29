@@ -1,8 +1,0 @@
-# Dependencias adicionales para los scripts
-# Estas ya están incluidas en requirements.txt, pero se listan aquí para referencia
-
-httpx>=0.24.0          # Cliente HTTP async para pruebas de endpoints
-python-dotenv>=1.0.0   # Cargar variables de entorno
-sqlalchemy>=2.0.0      # ORM y soporte async
-supabase>=2.0.0        # Cliente de Supabase
-passlib[argon2]>=1.7.4 # Hashing de contraseñas y API keys

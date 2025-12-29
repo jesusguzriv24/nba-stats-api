@@ -1,10 +1,10 @@
 """
-Scripts para pruebas del NBA Stats API.
+Scripts package for NBA Stats API testing and utilities.
 
-Módulos:
-- user_creator: Crear nuevos usuarios
-- subscription_assigner: Asignar suscripciones
-- api_key_creator: Generar API keys
-- endpoint_tester: Probar endpoints con rate limiting
-- main: Orquestrador del flujo completo
+Modules:
+- user_generator: Create test users
+- subscription_generator: Manage user subscriptions
+- apikey_generator: Generate API keys
+- api_client: Make API requests and test rate limiting
+- main_test_flow: Complete workflow orchestration
 """

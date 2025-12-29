@@ -1,0 +1,263 @@
+                          📦 ESTRUCTURA DEL PROYECTO SCRIPTS
+                              
+                           🎯 OBJETIVO PRINCIPAL
+
+Automatizar el flujo completo de prueba de NBA Stats API:
+  1. Crear usuario en Supabase + BD
+  2. Asignar suscripción 'free'
+  3. Generar API key
+  4. Probar endpoints hasta alcanzar límite de rate limiting
+
+═══════════════════════════════════════════════════════════════════════════
+
+                            📂 ARCHIVOS CREADOS
+
+CÓDIGO PRINCIPAL (Para Ejecutar):
+├── main.py ⭐
+│   └─ Script orquestrador principal
+│      Ejecuta: user_creator → subscription_assigner → api_key_creator → endpoint_tester
+│
+├── user_creator.py
+│   └─ Módulo para crear usuarios
+│      Entrada: email
+│      Salida: user_info {id, email, supabase_user_id, created_at}
+│
+├── subscription_assigner.py
+│   └─ Módulo para asignar suscripciones
+│      Entrada: user_id
+│      Salida: subscription_info {subscription_id, plan_name, rate_limits}
+│
+├── api_key_creator.py
+│   └─ Módulo para generar API keys
+│      Entrada: user_id, key_name
+│      Salida: api_key_info {id, api_key, last_chars, rate_limit_plan}
+│
+└── endpoint_tester.py
+    └─ Módulo para probar endpoints
+       Entrada: api_key, endpoints, limit_window
+       Salida: test_results [{request_number, endpoint, status_code, ...}]
+
+CÓDIGO DE UTILIDAD:
+├── examples.py
+│   └─ Ejemplos avanzados de uso
+│      • Crear múltiples usuarios
+│      • Setup completo en una función
+│      • Probar endpoints específicos
+│      • Monitorear rate limits
+│      • Consultar datos de usuario
+│
+└── __init__.py
+    └─ Inicializador del módulo
+
+DOCUMENTACIÓN:
+├── QUICKREF.md ⚡
+│   └─ Referencia rápida (2-3 min)
+│      Lo mínimo imprescindible para empezar
+│
+├── README.md 📖
+│   └─ Guía completa
+│      Requisitos, instalación, uso detallado, ejemplos
+│
+├── ARCHITECTURE.md 🏗️
+│   └─ Documentación técnica
+│      Diagramas de flujo, estructura de BD, flujos de datos
+│
+├── TROUBLESHOOTING.md 🔧
+│   └─ Solución de problemas
+│      Errores comunes, soluciones, debugging
+│
+├── INDEX.md 📚
+│   └─ Índice de archivos
+│      Descripción de cada archivo, cuándo usarlo
+│
+└── SUMMARY.txt 📋
+    └─ Resumen ejecutivo
+       Overview de todo lo creado, inicio rápido
+
+CONFIGURACIÓN:
+└── requirements-scripts.txt
+    └─ Dependencias Python (referencia)
+
+═══════════════════════════════════════════════════════════════════════════
+
+                          🚀 INICIO RÁPIDO (30 segundos)
+
+$ cd e:\Proyectos\nba-stats-api
+$ python scripts/main.py test@example.com
+
+✓ Usuario creado
+✓ Suscripción asignada  
+✓ API key generada
+✓ Endpoints probados
+
+═══════════════════════════════════════════════════════════════════════════
+
+                            📊 RELACIONES
+
+                               main.py
+                                  │
+                 ┌────────────────┼────────────────┐
+                 │                │                │
+                 ▼                ▼                ▼
+            user_creator   subscription_assigner api_key_creator
+                 │                │                │
+                 └────────────────┼────────────────┘
+                                  │
+                                  ▼
+                           endpoint_tester
+
+═══════════════════════════════════════════════════════════════════════════
+
+                         🎓 DÓNDE BUSCAR INFORMACIÓN
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│ "Quiero empezar ya" → QUICKREF.md                    (⏱️ 2 min)        │
+├─────────────────────────────────────────────────────────────────────────┤
+│ "¿Cómo instalo?" → README.md sección "Requisitos"    (⏱️ 5 min)        │
+├─────────────────────────────────────────────────────────────────────────┤
+│ "¿Cómo lo uso?" → README.md sección "Uso"            (⏱️ 5 min)        │
+├─────────────────────────────────────────────────────────────────────────┤
+│ "¿Cómo funciona?" → ARCHITECTURE.md                  (⏱️ 10 min)       │
+├─────────────────────────────────────────────────────────────────────────┤
+│ "Tengo un error" → TROUBLESHOOTING.md                (⏱️ variable)     │
+├─────────────────────────────────────────────────────────────────────────┤
+│ "Quiero ejemplos" → examples.py                      (⏱️ 15 min)       │
+├─────────────────────────────────────────────────────────────────────────┤
+│ "¿Qué archivo es?" → INDEX.md                        (⏱️ 5 min)        │
+└─────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+
+                            ✅ CARACTERÍSTICAS
+
+✓ Modular        - Cada paso en su propio módulo
+✓ Reutilizable   - Usar módulos independientemente
+✓ Documentado    - Docstrings y documentación completa
+✓ Async/Await    - Operaciones no bloqueantes
+✓ Seguro         - API keys hasheadas con Argon2
+✓ Flexible       - Parámetros personalizables
+✓ Robusto        - Manejo de errores y validaciones
+✓ Observable     - Logging y salida clara
+
+═══════════════════════════════════════════════════════════════════════════
+
+                            📈 FLUJO DE EJECUCIÓN
+
+1. usuario ingresa: python scripts/main.py test@example.com
+
+2. main.py inicia:
+   ├─ Parsea argumentos
+   ├─ Crea TestFlowOrchestrator
+   └─ Llama run_complete_flow()
+
+3. Pasos ejecutados:
+   ├─ PASO 1: user_creator.create_user()
+   │   └─ Crea usuario en Supabase + BD
+   ├─ PASO 2: subscription_assigner.assign_free_subscription()
+   │   └─ Asigna plan 'free'
+   ├─ PASO 3: api_key_creator.create_api_key()
+   │   └─ Genera API key segura
+   └─ PASO 4: endpoint_tester.test_endpoints_until_limit()
+       └─ Prueba endpoints hasta límite
+
+4. Salida:
+   ├─ Resumen en consola
+   ├─ Datos completos retornados
+   └─ Código de salida: 0 (éxito) o 1 (error)
+
+═══════════════════════════════════════════════════════════════════════════
+
+                          🔐 SEGURIDAD INTEGRADA
+
+API Keys:
+├─ Generadas con secrets.token_urlsafe(32)
+├─ Hasheadas con Argon2 (nunca texto plano en BD)
+├─ Mostradas solo UNA VEZ al crear
+└─ No recuperables después de creadas
+
+Contraseñas:
+├─ Se almacenan en Supabase Auth (no en nuestra BD)
+└─ Manejadas automáticamente por Supabase
+
+Rate Limiting:
+├─ Almacenado en Redis (volátil)
+├─ Ventanas independientes (minuto/hora/día)
+└─ Reseteadas automáticamente
+
+═══════════════════════════════════════════════════════════════════════════
+
+                          🎯 PARÁMETROS SOPORTADOS
+
+main.py EMAIL [OPTIONS]
+
+EMAIL (requerido)
+└─ test@example.com, user@domain.io, etc.
+
+--api-url URL (opcional)
+├─ Default: http://localhost:8000/api/v1
+└─ Ejemplo: --api-url http://api.example.com/api/v1
+
+--limit-window WINDOW (opcional)
+├─ minute (default) - 10 requests
+├─ hour             - 100 requests
+└─ day              - 1000 requests
+
+═══════════════════════════════════════════════════════════════════════════
+
+                            💾 DATOS CREADOS EN BD
+
+Tabla users:
+├─ id: int (auto-incrementado)
+├─ email: string (único)
+├─ supabase_user_id: UUID (único)
+├─ role: string
+├─ is_active: boolean
+└─ created_at, updated_at: timestamps
+
+Tabla user_subscriptions:
+├─ id: int (auto-incrementado)
+├─ user_id: FK → users
+├─ plan_id: FK → subscription_plans
+├─ status: 'active'
+├─ current_period_start: datetime
+├─ current_period_end: datetime (ahora + 30 días)
+└─ price_paid_cents: 0 (gratis)
+
+Tabla api_keys:
+├─ id: int (auto-incrementado)
+├─ user_id: FK → users
+├─ key_hash: string (Argon2)
+├─ last_chars: string (últimos 8)
+├─ is_active: boolean
+├─ rate_limit_plan: 'free'
+├─ created_at: timestamp
+└─ expires_at: null
+
+═══════════════════════════════════════════════════════════════════════════
+
+                            📞 CONTACTO Y SOPORTE
+
+Si algo no funciona:
+1. Ver TROUBLESHOOTING.md (soluciones comunes)
+2. Verificar .env está configurado
+3. Verificar BD está corriendo
+4. Verificar API está corriendo
+5. Revisar logs en consola
+
+═══════════════════════════════════════════════════════════════════════════
+
+                          🚀 ¡LISTO PARA USAR!
+
+Ejecuta en terminal:
+
+    python scripts/main.py test@example.com
+
+Y espera a ver:
+
+    ✓ Flujo completado exitosamente
+    ✓ Usuario: test@example.com
+    ✓ Suscripción: free
+    ✓ API Key: bestat_nba_xK9mP2vQ7sL4nR8wE3jT1dF6hY5cV0bN
+    ✓ Requests realizados: 10
+
+═══════════════════════════════════════════════════════════════════════════

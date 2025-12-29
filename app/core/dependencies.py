@@ -8,7 +8,7 @@ Now integrated with subscription plans and usage tracking.
 from fastapi import Depends, HTTPException, status, Security, Request 
 from fastapi.security import APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from datetime import datetime
 
 from app.core.database import get_db
@@ -176,8 +176,13 @@ async def get_current_user_from_api_key(
         result = await db.execute(
             select(APIKey)
             .where(APIKey.is_active == True)
-            .where(APIKey.revoked_at == None)
-            .where(APIKey.expires_at == None or APIKey.expires_at > datetime.now())
+            .where(APIKey.revoked_at.is_(None))
+            .where(
+                or_(
+                APIKey.expires_at.is_(None),
+                APIKey.expires_at > datetime.now()
+                )
+            )
         )
         active_keys = result.scalars().all()
 

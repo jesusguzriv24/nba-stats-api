@@ -181,12 +181,10 @@ async def get_or_create_user_from_jwt(
     """
     Fetch or create user from JWT payload (lazy sync).
     
-    Args:
-        payload: Decoded JWT payload
-        db: Database session
-        
-    Returns:
-        User: User instance
+    Robust Strategy:
+    1. Check by Supabase ID.
+    2. Check by Email (fallback to prevent duplicates).
+    3. Create if neither exists.
     """
     supabase_user_id = payload.get("sub")
     email = payload.get("email")
@@ -197,27 +195,58 @@ async def get_or_create_user_from_jwt(
             detail="Invalid token payload: missing sub or email"
         )
     
-    # Search for existing user
+    # 1. Try to find by Supabase ID (Primary lookup)
     result = await db.execute(
         select(User).where(User.supabase_user_id == supabase_user_id)
     )
     user = result.scalar_one_or_none()
     
-    # Create if not found (lazy sync)
+    # 2. If not found by ID, try finding by EMAIL (Safety fallback)
+    # This catches cases where the user exists but IDs mismatch, preventing duplicate errors.
+    if not user:
+        result_email = await db.execute(
+            select(User).where(User.email == email)
+        )
+        user = result_email.scalar_one_or_none()
+        
+        if user:
+            print(f"[INFO] User found by email (ID mismatch). Syncing ID for {email}")
+            # Update the Supabase ID to match the current token if needed
+            if user.supabase_user_id != supabase_user_id:
+                user.supabase_user_id = supabase_user_id
+                db.add(user)
+                await db.commit()
+                await db.refresh(user)
+    
+    # 3. Create if not found (lazy sync)
     if not user:
         user = User(
             supabase_user_id=supabase_user_id,
             email=email,
             role="user",
-            is_active=True,
-        #rate_limit_tier="free",
-        #usage_count=0
+            is_active=True
+            # STOP: Do not add 'rate_limit_tier' or 'usage_count' here.
         )
         db.add(user)
-        await db.commit()
-        await db.refresh(user)
         
-        print(f"[SUCCESS] User created via lazy sync: {email} (ID: {user.id})")
+        try:
+            await db.commit()
+            await db.refresh(user)
+            print(f"[SUCCESS] User created via lazy sync: {email} (ID: {user.id})")
+        except Exception as e:
+            # Handle potential race conditions (e.g., double request)
+            await db.rollback()
+            print(f"[WARN] Error creating user (possible duplicate): {e}")
+            
+            # One last attempt to fetch existing user
+            result_final = await db.execute(select(User).where(User.email == email))
+            user = result_final.scalar_one_or_none()
+            
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to synchronize user."
+                )
     
     return user
 

@@ -160,7 +160,12 @@ async def create_api_key(
         last_used_at=new_api_key.last_used_at,
         revoked_at=new_api_key.revoked_at,
         expires_at=new_api_key.expires_at,
-        api_key=key_data["key"]  # Complete key only returned here
+        
+        custom_rate_limit_per_minute=new_api_key.custom_rate_limit_per_minute,
+        custom_rate_limit_per_hour=new_api_key.custom_rate_limit_per_hour,
+        custom_rate_limit_per_day=new_api_key.custom_rate_limit_per_day,
+        
+        api_key=key_data["key"] 
     )
 
 

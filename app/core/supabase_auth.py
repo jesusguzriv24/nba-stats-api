@@ -210,7 +210,7 @@ async def get_or_create_user_from_jwt(
             email=email,
             role="user",
             is_active=True,
-            rate_limit_tier="free",
+            #rate_limit_tier="free",
             usage_count=0
         )
         db.add(user)

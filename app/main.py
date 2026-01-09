@@ -106,6 +106,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",        # Local Next.js dev server
     # "https://your-frontend.com",  # Production frontend (uncomment and adjust)
+    "http://127.0.0.1:3000",
 ]
 
 app.add_middleware(
@@ -114,6 +115,13 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],            # Allow all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],            # Allow all headers
+    expose_headers=[
+        "x-ratelimit-limit-day",
+        "x-ratelimit-remaining-day",
+        "x-ratelimit-reset-day",
+        "x-ratelimit-limit-minute", 
+        "x-ratelimit-remaining-minute"
+    ]
 )
 
 # Add custom middleware in correct order (LIFO - Last In, First Out execution)

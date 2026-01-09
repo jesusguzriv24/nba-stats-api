@@ -115,9 +115,15 @@ async def create_api_key(
             detail="User account is inactive"
         )
     
-    # Get user's current subscription plan
-    subscription, plan = await get_active_user_subscription(user.id, db)
-    plan_name = plan.plan_name if plan else "free"
+    # Get user's current subscription plan (SAFE MODE)
+    result = await get_active_user_subscription(user.id, db)
+    
+    if result:
+        subscription, plan = result
+        plan_name = plan.plan_name if plan else "free"
+    else:
+        subscription, plan = None, None
+        plan_name = "free"
     
     # Generate cryptographically secure API key
     key_data = generate_api_key()

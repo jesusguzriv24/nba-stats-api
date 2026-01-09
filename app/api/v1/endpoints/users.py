@@ -75,6 +75,7 @@ async def get_current_user_profile(
         updated_at=user.updated_at,  
         supabase_user_id=user.supabase_user_id,
         api_keys_count=api_keys_count,
+        max_api_keys=plan.max_api_keys if plan else 1,
         current_plan=plan.plan_name if plan else "free",
         subscription_status=subscription.status if subscription else None
     )
@@ -121,9 +122,27 @@ async def create_api_key(
     if result:
         subscription, plan = result
         plan_name = plan.plan_name if plan else "free"
+        max_keys = plan.max_api_keys if plan else 1
     else:
         subscription, plan = None, None
         plan_name = "free"
+        max_keys = 1
+        
+    # Enforce max_api_keys limit
+    result = await db.execute(
+        select(func.count(APIKey.id)).where(
+            APIKey.user_id == user.id,
+            APIKey.is_active == True,
+            APIKey.revoked_at.is_(None)
+        )
+    )
+    active_keys_count = result.scalar()
+    
+    if active_keys_count >= max_keys:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Maximum number of API keys reached for your plan ({max_keys}). Please upgrade your plan for more keys."
+        )
     
     # Generate cryptographically secure API key
     key_data = generate_api_key()

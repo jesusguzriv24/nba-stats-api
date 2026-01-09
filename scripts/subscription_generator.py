@@ -49,6 +49,7 @@ async def get_or_create_free_plan() -> SubscriptionPlan:
             price_yearly_cents=0,
             is_active=True,
             display_order=1,
+            max_api_keys=1,
             features='["basic_access", "rate_limited"]'
         )
         session.add(free_plan)

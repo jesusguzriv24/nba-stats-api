@@ -60,6 +60,7 @@ class UserWithKeysResponse(UserResponse):
     their profile along with API key count and current plan.
     """
     api_keys_count: int
+    max_api_keys: int
     current_plan: str  # Plan name (free, premium, pro)
     subscription_status: Optional[str] = None  # active, cancelled, expired, etc.
     

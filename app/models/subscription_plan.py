@@ -14,7 +14,7 @@ class SubscriptionPlan(Base):
     __tablename__ = "subscription_plans"
     
     # Primary key
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True) 
     
     # Plan identifier: 'free', 'premium', 'pro'
     plan_name = Column(String(50), unique=True, nullable=False, index=True)
@@ -29,6 +29,9 @@ class SubscriptionPlan(Base):
     rate_limit_per_minute = Column(Integer, nullable=False)
     rate_limit_per_hour = Column(Integer, nullable=False)
     rate_limit_per_day = Column(Integer, nullable=False)
+    
+    # Maximum number of API keys allowed for this plan
+    max_api_keys = Column(Integer, nullable=False, default=1)
     
     # Pricing information (in USD cents to avoid floating point issues)
     price_monthly_cents = Column(Integer, nullable=False, default=0)

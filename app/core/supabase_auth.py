@@ -211,7 +211,7 @@ async def get_or_create_user_from_jwt(
             role="user",
             is_active=True,
         #rate_limit_tier="free",
-            usage_count=0
+        #usage_count=0
         )
         db.add(user)
         await db.commit()

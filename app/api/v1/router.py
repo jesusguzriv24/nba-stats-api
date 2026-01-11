@@ -1,7 +1,7 @@
 # app/api/v1/router.py
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import teams, players, games, stats, datasets, webhooks, users, subscriptions
+from app.api.v1.endpoints import teams, players, games, stats, datasets, webhooks, users, subscriptions, logs
 
 api_v1_router = APIRouter()
 api_v1_router.include_router(teams.router, prefix="/teams", tags=["teams"])
@@ -12,3 +12,4 @@ api_v1_router.include_router(datasets.router, prefix="/datasets", tags=["dataset
 api_v1_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
 api_v1_router.include_router(users.router, prefix="/users", tags=["users"])
 api_v1_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
+api_v1_router.include_router(logs.router, prefix="/logs", tags=["logs"])

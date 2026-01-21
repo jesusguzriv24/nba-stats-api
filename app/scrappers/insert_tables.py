@@ -16,6 +16,7 @@ from app.models.game import Game, GameType
 from app.models.team_game_stats import TeamGameStats
 from app.models.player_game_stats import PlayerGameStats
 from app.models.daily_game import DailyGame
+from app.models.player_prop import PlayerProp
 
 
 # ---------------------------------------------------------------------------

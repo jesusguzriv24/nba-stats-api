@@ -4,7 +4,7 @@ import json
 import pandas as pd
 import asyncio
 from datetime import datetime
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 # Add project root to Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -24,6 +24,13 @@ from app.models.player_prop import PlayerProp
 # ---------------------------------------------------------------------------
 TEAMS_JSON_PATH = "app/scrappers/utils/teams.json"
 PLAYERS_JSON_PATH = "app/scrappers/utils/players.json"
+
+# Manual aliases for players whose names change significantly between sources
+PLAYER_ALIASES = {
+    "ronald holland": "ron holland",
+    "cameron thomas": "cam thomas",
+    # Add more as they appear in logs
+}
 
 
 # ---------------------------------------------------------------------------
@@ -57,6 +64,34 @@ def parse_start_time(date_str, time_str):
         return datetime.strptime(full_str, "%Y-%m-%d %I:%M %p")
     except ValueError:
         return None
+
+
+def normalize_name(name: str) -> str:
+    """
+    Normalizes a player name for better matching:
+    - Lowercase
+    - Remove dots (A.J. -> AJ)
+    - Remove common suffixes (Jr., Sr., III, etc.)
+    - Strip whitespace
+    """
+    if not name:
+        return ""
+    
+    # 1. Lowercase and remove dots
+    n = name.lower().replace(".", "")
+    
+    # 2. Remove common suffixes
+    # We use regex or simple list replacement
+    suffixes = [" jr", " sr", " iii", " ii", " iv"]
+    for suffix in suffixes:
+        if n.endswith(suffix):
+            n = n[: -len(suffix)]
+            break
+    
+    n = n.strip()
+    
+    # 3. Apply manual alias if exists
+    return PLAYER_ALIASES.get(n, n)
 
 
 def clean_float(val):
@@ -135,39 +170,47 @@ def load_maps():
     with open(PLAYERS_JSON_PATH, "r") as f:
         p_data = json.load(f)
 
-    player_map = {}
+    # player_map will store two types of lookups
+    player_map = {
+        "by_name_team": {},  # Key: (norm_name, team_id)
+        "by_name": {}        # Key: norm_name (fallback)
+    }
+    
     for p in p_data["players"]:
-        first = str(p["first_name"]).strip().lower()
-        last = str(p["last_name"]).strip().lower()
-        key_tuple = (first, last)
-        full_key = f"{first} {last}"
-        player_map[key_tuple] = p["id"]
-        player_map[full_key] = p["id"]
+        first = str(p["first_name"]).strip()
+        last = str(p["last_name"]).strip()
+        p_id = p["id"]
+        t_id = p.get("team_id")
+        
+        norm_name = normalize_name(f"{first} {last}")
+        
+        # 1. Map by name + team (most precise)
+        if t_id:
+            player_map["by_name_team"][(norm_name, t_id)] = p_id
+            
+        # 2. Map by name only (fallback)
+        # If duplicates exist, we take the one already there or the latest
+        player_map["by_name"][norm_name] = p_id
 
     return team_map, player_map
 
 
-def get_player_id(name_str, player_map):
+def get_player_id(name_str, team_id, player_map):
     """
-    Resolve a player name from the DataFrame into a player_id using the player_map.
-    Returns None if the name is missing or not found.
+    Resolve a player name into an ID using Name + Team ID or just Name as fallback.
     """
     if not name_str or str(name_str).strip().upper() in ["NO INFO", "N/A", "0", "0.0"]:
         return None
 
-    clean_name = str(name_str).strip()
-    lower_full = clean_name.lower()
-
-    # Direct full-name match ("first last")
-    if lower_full in player_map:
-        return player_map[lower_full]
-
-    # Split into first/last and try tuple key
-    parts = lower_full.split(" ", 1)
-    if len(parts) == 2:
-        key = (parts[0], parts[1])
-        if key in player_map:
-            return player_map[key]
+    norm_input = normalize_name(str(name_str))
+    
+    # Try 1: Name + Team match
+    if team_id and (norm_input, team_id) in player_map["by_name_team"]:
+        return player_map["by_name_team"][(norm_input, team_id)]
+        
+    # Try 2: Name only fallback
+    if norm_input in player_map["by_name"]:
+        return player_map["by_name"][norm_input]
 
     return None
 
@@ -467,11 +510,10 @@ async def populate_games_and_stats(df: pd.DataFrame):
 
 async def cleanup_daily_games(session):
     """
-    Clear all records from the daily_games table.
+    Clear records and reset IDs for daily_games.
     """
-    from sqlalchemy import delete
-    print("[INFO] Cleaning up daily_games table...")
-    await session.execute(delete(DailyGame))
+    print("[INFO] Truncating daily_games table (resetting IDs)...")
+    await session.execute(text("TRUNCATE TABLE daily_games RESTART IDENTITY CASCADE"))
     await session.commit()
 
 
@@ -479,22 +521,22 @@ async def populate_daily_games(df: pd.DataFrame):
     """
     Populate the daily_games table with today's scheduled games from a DataFrame.
     """
-    if df.empty:
-        print("[INFO] No daily games to populate.")
-        return
-
-    print(f">> Populating {len(df)} daily games...")
-    team_map, _ = load_maps()
-
-    # Normalize team abbreviations (same logic as in populate_games_and_stats)
-    abbr_map = {"BRK": "BKN", "CHO": "CHA", "PHO": "PHX"}
-    df["VT"] = df["VT"].replace(abbr_map)
-    df["HT"] = df["HT"].replace(abbr_map)
-
     async with AsyncSessionLocal() as session:
+        await cleanup_daily_games(session)
+        
+        if df.empty:
+            print("[INFO] No daily games to populate.")
+            return
+
+        print(f">> Populating {len(df)} daily games...")
+        team_map, _ = load_maps()
+
+        # Normalize team abbreviations (same logic as in populate_games_and_stats)
+        abbr_map = {"BRK": "BKN", "CHO": "CHA", "PHO": "PHX"}
+        df["VT"] = df["VT"].replace(abbr_map)
+        df["HT"] = df["HT"].replace(abbr_map)
+
         try:
-            # First, clean up the table
-            await cleanup_daily_games(session)
 
             for idx, row in df.iterrows():
                 date_str = row.get("Date")
@@ -525,6 +567,118 @@ async def populate_daily_games(df: pd.DataFrame):
         except Exception as e:
             await session.rollback()
             print(f"[ERROR] Failed to populate daily games: {e}")
+
+
+async def cleanup_player_props(session):
+    """
+    Clear records and reset IDs for player_props.
+    """
+    print("[INFO] Truncating player_props table (resetting IDs)...")
+    await session.execute(text("TRUNCATE TABLE player_props RESTART IDENTITY CASCADE"))
+    await session.commit()
+
+
+def clean_db_float(val):
+    """Convert NaN/None to None for DB float columns."""
+    if pd.isna(val):
+        return None
+    try:
+        return float(val)
+    except:
+        return None
+
+
+def clean_db_int(val):
+    """Convert NaN/None to None for DB int columns."""
+    if pd.isna(val):
+        return None
+    try:
+        return int(float(val))
+    except:
+        return None
+
+
+async def populate_player_props(df: pd.DataFrame):
+    """
+    Populate the player_props table with lines from the casino.
+    Links props to daily_games and players.
+    """
+    async with AsyncSessionLocal() as session:
+        await cleanup_player_props(session)
+
+        if df.empty:
+            print("[INFO] No player props to populate.")
+            return
+
+        print(f">> Populating {len(df)} player props...")
+        team_map, player_map = load_maps()
+
+        # Normalize team abbreviations
+        abbr_map = {"BRK": "BKN", "CHO": "CHA", "PHO": "PHX"}
+        df["player_team"] = df["player_team"].replace(abbr_map)
+        df["opp_team"] = df["opp_team"].replace(abbr_map)
+
+        try:
+
+            # Pre-fetch today's daily games to link props later
+            stmt = select(DailyGame)
+            res = await session.execute(stmt)
+            daily_games = res.scalars().all()
+            
+            # Map for quick lookup: team_id -> daily_game_id
+            game_lookup = {}
+            for dg in daily_games:
+                game_lookup[dg.home_team_id] = dg.id
+                game_lookup[dg.visitor_team_id] = dg.id
+
+            count = 0
+            unmatched_players = set()
+            for _, row in df.iterrows():
+                # 1. Resolve Player
+                p_fullname = f"{row['name']} {row['last_name']}"
+                
+                # 2. Resolve Teams first to aid player matching
+                pt_id = team_map.get(row["player_team"])
+                ot_id = team_map.get(row["opp_team"])
+
+                p_id = get_player_id(p_fullname, pt_id, player_map)
+                
+                if not p_id:
+                    unmatched_players.add(p_fullname)
+                    continue
+                if not pt_id or not ot_id:
+                    continue
+
+                # 3. Find Daily Game
+                dg_id = game_lookup.get(pt_id)
+
+                prop_entry = PlayerProp(
+                    player_id=p_id,
+                    player_team_id=pt_id,
+                    opp_team_id=ot_id,
+                    daily_game_id=dg_id,
+                    prop_type=row["prop"],
+                    line=clean_db_float(row["line"]),
+                    over_odds=clean_db_int(row["over_odds"]),
+                    under_odds=clean_db_int(row["under_odds"])
+                )
+                session.add(prop_entry)
+                count += 1
+
+            await session.commit()
+            print(f"[OK] {count} player props successfully populated.")
+            
+            if unmatched_players:
+                print("\n[WARN] The following players were NOT found in players.json (no props added):")
+                for name in sorted(unmatched_players):
+                    print(f"  - {name}")
+                print("-" * 60)
+
+        except Exception as e:
+            await session.rollback()
+            print(f"[ERROR] Failed to populate player props: {e}")
+            import traceback
+            traceback.print_exc()
 
 
 # If executed as main

@@ -17,8 +17,7 @@ async def main():
     # 3) Process player props (Casino lines)
     from app.scrappers.player_props import scrape_nba_props
     props_df = scrape_nba_props()
-    if not props_df.empty:
-        await populate_player_props(props_df)
+    await populate_player_props(props_df)
 
     # 4) Process historical games (yesterday and before)
     if not historical_df.empty:

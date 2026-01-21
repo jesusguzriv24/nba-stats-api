@@ -20,6 +20,7 @@ class Player(Base):
     last_name = Column(String, nullable=False)
     country = Column(String, nullable=True)     # e.g., "USA"
     college = Column(String, nullable=True)     # e.g., "Davidson"
+    image_url = Column(String, nullable=True)   # e.g. "https://..."
 
     # ------------------------------------------------------------------
     # PHYSICAL ATTRIBUTES & GAME INFO
@@ -27,7 +28,7 @@ class Player(Base):
     position = Column(String, nullable=True)    # e.g., "G", "F"
     height = Column(String, nullable=True)      # e.g., "6-2"
     weight = Column(Integer, nullable=True)      # e.g., "185"
-    jersey_number = Column(Integer, nullable=True) # e.g., "30"
+    jersey_number = Column(Integer, nullable=True) # e.g., "30" 
 
     # ------------------------------------------------------------------
     # DRAFT INFORMATION

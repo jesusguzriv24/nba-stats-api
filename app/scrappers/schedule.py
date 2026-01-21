@@ -159,17 +159,17 @@ def scrape_nba_schedule_month(year: int, month: str) -> Optional[pd.DataFrame]:
     Download and process the schedule table for a specific year and month
     from Basketball Reference, returning a DataFrame with:
 
-    Date, VT, VT_PTS, HT, HT_PTS
+    Date, Start (ET), VT, VT_PTS, HT, HT_PTS
 
     - Finished games keep their real scores.
-    - Games not played yet (no scores) get 0 in VT_PTS and HT_PTS.
+    - Games not played yet (no scores) keep NaN or get 0.
     """
     url = BASE_URL.format(year=year, month=month.lower().replace(" ", "-"))
     print(f"[INFO] Requesting URL: {url}")
 
     try:
         # Read HTML table with id='schedule'
-        tables = pd.read_html(url, attrs={"id": "schedule"})  # [web:31][web:27]
+        tables = pd.read_html(url, attrs={"id": "schedule"})
 
         if not tables:
             print(f"[WARN] No 'schedule' table found for {year} - {month}")
@@ -178,13 +178,16 @@ def scrape_nba_schedule_month(year: int, month: str) -> Optional[pd.DataFrame]:
         df = tables[0]
 
         # Keep only necessary columns
-        columns_to_keep = ["Date", "Visitor/Neutral", "PTS", "Home/Neutral", "PTS.1"]
-        df = df[columns_to_keep].copy()
+        columns_to_keep = ["Date", "Start (ET)", "Visitor/Neutral", "PTS", "Home/Neutral", "PTS.1"]
+        # Ensure columns exist before filtering
+        existing_cols = [c for c in columns_to_keep if c in df.columns]
+        df = df[existing_cols].copy()
 
         # Rename columns
         df.rename(
             columns={
                 "Date": "Date",
+                "Start (ET)": "Time",
                 "Visitor/Neutral": "VT",
                 "PTS": "VT_PTS",
                 "Home/Neutral": "HT",
@@ -197,111 +200,99 @@ def scrape_nba_schedule_month(year: int, month: str) -> Optional[pd.DataFrame]:
         df["VT"] = df["VT"].replace(NBA_TEAMS)
         df["HT"] = df["HT"].replace(NBA_TEAMS)
 
-        # Drop rows with missing Date or team names (allow missing scores)
-        #df = df.dropna(subset=["Date", "VT", "HT"])
+        # Drop rows with missing crucial info (Date, Teams)
+        df = df.dropna(subset=["Date", "VT", "HT"])
 
-        # Fill missing scores (games not played yet) with 0 and cast to int
-        #df["VT_PTS"] = df["VT_PTS"].fillna(0).astype(int)  # [web:75][web:77]
-        #df["HT_PTS"] = df["HT_PTS"].fillna(0).astype(int)
-
-        # Drop rows with missing Date, teams or scores
-        # This removes games that do not have points yet (not played)
-        df = df.dropna(subset=["Date", "VT", "HT", "VT_PTS", "HT_PTS"])
-
-        # Cast scores to int
-        df["VT_PTS"] = df["VT_PTS"].astype(int)
-        df["HT_PTS"] = df["HT_PTS"].astype(int)
-
-
-        # Normalize Date to YYYY-MM-DD (string)
+        # Convert Date to string YYYY-MM-DD
         df["Date"] = pd.to_datetime(df["Date"]).dt.strftime("%Y-%m-%d")
 
-        print(f"[OK] Extracted {len(df)} games for {year} - {month}")
+        print(f"[OK] Extracted {len(df)} total games for {year} - {month}")
         return df
 
     except Exception as exc:
         print(f"[ERROR] Failed to process {year} - {month}: {exc}")
         return None
 
+    except Exception as exc:
+        print(f"[ERROR] Failed to process {year} - {month}: {exc}")
+        return None
 
-async def fetch_schedule_dataframe() -> pd.DataFrame:
+
+async def fetch_schedule_dataframe() -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Main function to:
     - Read last 'Final' game date from DB
     - Determine date range until current server date
     - Scrape all necessary months from Basketball Reference
-    - Return a combined DataFrame:
-
-      Date,VT,VT_PTS,HT,HT_PTS
-
-    This function does NOT insert into the database.
+    - Return two DataFrames:
+        1. historical_df: Games with scores (before today)
+        2. daily_df: Games for today (scheduled)
     """
     print("=" * 60)
-    print(" NBA SCHEDULE SCRAPER (DATAFRAME MODE)")
+    print(" NBA SCHEDULE SCRAPER (DUAL MODE: HISTORICAL + DAILY)")
     print("=" * 60)
 
     start_date, end_date = await get_scraping_date_range()
     print(f"[INFO] Start date from DB (next after last Final): {start_date}")
     print(f"[INFO] End date (server today):                  {end_date}")
 
-    # Determine which (year, month) pairs need to be scraped
     year_month_pairs = get_year_month_pairs_in_range(start_date, end_date)
-    print("\n[INFO] Year/Month pairs to scrape:")
-    for year, month_name in year_month_pairs:
-        print(f"  - {year} / {month_name}")
-
+    
     all_frames: List[pd.DataFrame] = []
-    total_requests = 0
-    successful_requests = 0
-
     for year, month_name in year_month_pairs:
-        # Filter by NBA_SEASONS dictionary (safety check)
         if year not in NBA_SEASONS or month_name not in NBA_SEASONS[year]:
-            print(f"[SKIP] {year} - {month_name} is not in NBA_SEASONS configuration")
             continue
 
-        total_requests += 1
         df_month = scrape_nba_schedule_month(year, month_name)
-
         if df_month is not None and not df_month.empty:
             all_frames.append(df_month)
-            successful_requests += 1
 
     if not all_frames:
-        print("\n[FAIL] No data extracted for the selected range.")
-        return pd.DataFrame(columns=["Date", "VT", "VT_PTS", "HT", "HT_PTS"])
+        print("\n[FAIL] No data extracted.")
+        return pd.DataFrame(), pd.DataFrame()
 
-    # Combine all DataFrames
     combined_df = pd.concat(all_frames, ignore_index=True)
-
-    # Ensure correct column order and types
-    combined_df = combined_df[["Date", "VT", "VT_PTS", "HT", "HT_PTS"]]
-    combined_df["VT_PTS"] = combined_df["VT_PTS"].astype(int)
-    combined_df["HT_PTS"] = combined_df["HT_PTS"].astype(int)
-
-    # Convert Date to datetime for sorting and filtering by range
     combined_df["Date"] = pd.to_datetime(combined_df["Date"])
 
-    # Keep only rows within the exact date range [start_date, end_date]
+    # Filter by range
     mask = (combined_df["Date"] >= pd.to_datetime(start_date)) & (
         combined_df["Date"] <= pd.to_datetime(end_date)
     )
-    combined_df = combined_df.loc[mask]
+    combined_df = combined_df.loc[mask].copy()
 
-    # Sort by Date descending and back to YYYY-MM-DD string
-    combined_df.sort_values(by="Date", ascending=False, inplace=True)
-    combined_df["Date"] = combined_df["Date"].dt.strftime("%Y-%m-%d")
-    combined_df.reset_index(drop=True, inplace=True)
+    # Split: Historical (with scores) vs Daily (today)
+    today_str = end_date.strftime("%Y-%m-%d")
+    
+    # Historical: Date < today AND scores not NaN
+    historical_mask = (combined_df["Date"] < pd.to_datetime(today_str)) & (
+        combined_df["VT_PTS"].notna()
+    )
+    historical_df = combined_df.loc[historical_mask].copy()
+    
+    # Daily: Date == today
+    daily_mask = (combined_df["Date"] == pd.to_datetime(today_str))
+    daily_df = combined_df.loc[daily_mask].copy()
+
+    # Clean historical: cast scores to int
+    if not historical_df.empty:
+        historical_df["VT_PTS"] = historical_df["VT_PTS"].astype(int)
+        historical_df["HT_PTS"] = historical_df["HT_PTS"].astype(int)
+        historical_df["Date"] = historical_df["Date"].dt.strftime("%Y-%m-%d")
+        historical_df.sort_values(by="Date", ascending=False, inplace=True)
+
+    # Clean daily: keep Date, Time, VT, HT
+    if not daily_df.empty:
+        daily_df["Date"] = daily_df["Date"].dt.strftime("%Y-%m-%d")
+        daily_df = daily_df[["Date", "Time", "VT", "HT"]]
 
     print("\n" + "-" * 60)
-    print(" SCHEDULE DATAFRAME READY")
+    print(f" SCRAPER SUMMARY")
     print("-" * 60)
-    print(f" > Rows in range: {len(combined_df)}")
-    print(f" > Date range:    {combined_df['Date'].min()} -> {combined_df['Date'].max()}")
-    print(f" > Requests OK:   {successful_requests}/{total_requests}")
+    print(f" > Historical games: {len(historical_df)}")
+    print(f" > Daily games (today): {len(daily_df)}")
     print("-" * 60)
 
-    return combined_df
+    return historical_df, daily_df
 
 
 # --------------------------------------------------------------------
@@ -310,18 +301,13 @@ async def fetch_schedule_dataframe() -> pd.DataFrame:
 async def generate_test_schedule_csv() -> Path:
     """
     For testing purposes:
-    - Build the schedule DataFrame for the required date range
-    - Save it as a CSV file with structure:
-
-      Date,VT,VT_PTS,HT,HT_PTS
-      2025-12-08,SAS,135.0,NOP,132.0
-
-    Returns the path to the generated CSV.
+    - Build the schedule DataFrames
+    - Save the historical one as a CSV file
     """
-    df = await fetch_schedule_dataframe()
+    df_hist, df_daily = await fetch_schedule_dataframe()
 
-    if df.empty:
-        print("[WARN] Combined schedule DataFrame is empty. CSV will not be created.")
+    if df_hist.empty:
+        print("[WARN] Historical schedule DataFrame is empty. CSV will not be created.")
         return OUTPUT_DIR / "nba_schedule_test.csv"
 
     output_file = OUTPUT_DIR / "nba_schedule_test.csv"

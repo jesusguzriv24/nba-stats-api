@@ -21,6 +21,7 @@ class PlayerBase(BaseModel):
     draft_year: Optional[int] = None
     draft_round: Optional[int] = None
     draft_number: Optional[int] = None
+    image_url: Optional[str] = None
 
 
 # ------------------------------------------------------------------

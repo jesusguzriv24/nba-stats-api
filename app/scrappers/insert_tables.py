@@ -15,6 +15,7 @@ from app.models.player import Player
 from app.models.game import Game, GameType
 from app.models.team_game_stats import TeamGameStats
 from app.models.player_game_stats import PlayerGameStats
+from app.models.daily_game import DailyGame
 
 
 # ---------------------------------------------------------------------------
@@ -35,6 +36,25 @@ def parse_date(date_str):
     try:
         return datetime.strptime(str(date_str).replace("-", "/"), "%Y/%m/%d").date()
     except (ValueError, TypeError):
+        return None
+
+
+def parse_start_time(date_str, time_str):
+    """
+    Combine date (YYYY-MM-DD) and time (e.g., '10:00p') into a datetime object.
+    Basketball Reference uses '10:00p' for PM and '10:00a' for AM (ET time).
+    """
+    if not time_str or pd.isna(time_str):
+        return None
+    
+    time_str = str(time_str).lower().strip()
+    # Format '10:00p' -> '10:00 PM'
+    time_str = time_str.replace("p", " PM").replace("a", " AM")
+    
+    full_str = f"{date_str} {time_str}"
+    try:
+        return datetime.strptime(full_str, "%Y-%m-%d %I:%M %p")
+    except ValueError:
         return None
 
 
@@ -288,7 +308,7 @@ async def populate_games_and_stats(df: pd.DataFrame):
                     (Game.date == date_obj)
                     & (Game.home_team_id == ht_id)
                     & (Game.visitor_team_id == vt_id)
-                )
+                ) 
                 res = await session.execute(stmt)
                 if res.scalar_one_or_none():
                     print(f"Skipping row {idx}: Game already exists.")
@@ -442,6 +462,68 @@ async def populate_games_and_stats(df: pd.DataFrame):
             print(f"Error during data insertion: {e}")
             import traceback
             traceback.print_exc()
+
+
+async def cleanup_daily_games(session):
+    """
+    Clear all records from the daily_games table.
+    """
+    from sqlalchemy import delete
+    print("[INFO] Cleaning up daily_games table...")
+    await session.execute(delete(DailyGame))
+    await session.commit()
+
+
+async def populate_daily_games(df: pd.DataFrame):
+    """
+    Populate the daily_games table with today's scheduled games from a DataFrame.
+    """
+    if df.empty:
+        print("[INFO] No daily games to populate.")
+        return
+
+    print(f">> Populating {len(df)} daily games...")
+    team_map, _ = load_maps()
+
+    # Normalize team abbreviations (same logic as in populate_games_and_stats)
+    abbr_map = {"BRK": "BKN", "CHO": "CHA", "PHO": "PHX"}
+    df["VT"] = df["VT"].replace(abbr_map)
+    df["HT"] = df["HT"].replace(abbr_map)
+
+    async with AsyncSessionLocal() as session:
+        try:
+            # First, clean up the table
+            await cleanup_daily_games(session)
+
+            for idx, row in df.iterrows():
+                date_str = row.get("Date")
+                time_str = row.get("Time")
+                
+                game_datetime = parse_start_time(date_str, time_str)
+                if not game_datetime:
+                    print(f"[WARN] Invalid time format for daily game {idx}.")
+                    continue
+
+                vt_id = team_map.get(row.get("VT"))
+                ht_id = team_map.get(row.get("HT"))
+
+                if not vt_id or not ht_id:
+                    print(f"[WARN] Team not found for daily game {idx}.")
+                    continue
+
+                daily_game = DailyGame(
+                    date=game_datetime,
+                    home_team_id=ht_id,
+                    visitor_team_id=vt_id
+                )
+                session.add(daily_game)
+
+            await session.commit()
+            print("[OK] Daily games successfully populated.")
+
+        except Exception as e:
+            await session.rollback()
+            print(f"[ERROR] Failed to populate daily games: {e}")
 
 
 # If executed as main

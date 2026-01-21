@@ -127,16 +127,23 @@ The scrapers are designed to handle both historical data and real-time daily upd
 
 ### Teams and Players
 - `GET /api/v1/teams/`: List all 30 NBA teams.
+- `GET /api/v1/teams/{team_id}`: Retrieve detailed information for a specific team.
+- `GET /api/v1/teams/{team_id}/games`: List all games for a specific team.
 - `GET /api/v1/players/`: Search players by name, team, or position.
-- `GET /api/v1/players/{id}/stats`: Retrieve time-series performance data for a specific player.
+- `GET /api/v1/players/{player_id}`: Retrieve detailed profile for a specific player.
+- `GET /api/v1/players/{player_id}/games`: Retrieve historical performance data for a specific player.
 
 ### Games and Boxscores
 - `GET /api/v1/games/`: Filterable list of games by date or season.
-- `GET /api/v1/games/{id}/boxscore`: Comprehensive report including team totals and player statistics.
+- `GET /api/v1/games/{game_id}`: Get basic metadata and score for a specific game.
+- `GET /api/v1/games/{game_id}/team-stats`: Advanced team-level metrics for a specific game.
+- `GET /api/v1/games/{game_id}/player-stats`: Detailed statistics for every player in a specific game.
+- `GET /api/v1/games/{game_id}/boxscore`: Comprehensive report including team totals and player statistics.
 
 ### Advanced Analytics
 - `GET /api/v1/stats/teams`: Aggregated rankings by season and game type.
-- `GET /api/v1/datasets/player-game-stats`: Large-scale data retrieval for machine learning pipelines.
+- `GET /api/v1/datasets/player-game-stats`: Large-scale player data retrieval for machine learning pipelines.
+- `GET /api/v1/datasets/team-game-stats`: Large-scale team data retrieval for machine learning pipelines.
 
 ---
 
@@ -144,9 +151,9 @@ The scrapers are designed to handle both historical data and real-time daily upd
 
 The API implements a tier-based Rate Limiting system:
 
-- **Free Tier**: 10 requests per minute.
-- **Premium Tier**: 100 requests per minute.
-- **Pro Tier**: 1,000 requests per minute.
+- **Free Tier**: 10 req/min, 100 req/hour, 1,000 req/day.
+- **Premium Tier**: 100 req/min, 1,000 req/hour, 10,000 req/day.
+- **Pro Tier**: 1,000 req/min, 10,000 req/hour, 100,000 req/day.
 
 ### Security Methods
 - **JWT Authentication**: Primarily for the web dashboard.

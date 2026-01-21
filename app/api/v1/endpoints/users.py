@@ -25,7 +25,7 @@ from app.schemas.api_key import (
 router = APIRouter()
 
 
-@router.get("/health", tags=["Health"])
+@router.get("/health")
 async def health_check():
     """
     Health check endpoint - no authentication required.

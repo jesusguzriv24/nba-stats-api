@@ -20,9 +20,12 @@ pydantic==2.12.4
 pydantic_core==2.41.5
 email-validator==2.3.0
 
-# Web Scraping
+# Web Scraping & Automation
 beautifulsoup4==4.13.3
 lxml==5.3.2
+selenium==4.36.0
+webdriver-manager==4.0.2
+packaging==25.0
 
 # Authentication & Security
 python-jose[cryptography]==3.5.0

@@ -88,9 +88,9 @@ app = FastAPI(
 
     ----------- Rate Limiting -----------
 
-    **Free Tier:** 100 requests/hour  
-    **Pro Tier:** 1,000 requests/hour  
-    **Enterprise Tier:** 10,000 requests/hour
+    **Free Plan:** 10 req/min, 100 req/hour, 1,000 req/day
+    **Premium Plan:** 100 req/min, 1,000 req/hour, 10,000 req/day
+    **Pro Plan:** 1,000 req/min, 10,000 req/hour, 100,000 req/day
 
     Response headers:
     - `X-RateLimit-Limit`: Total request limit
@@ -173,26 +173,10 @@ async def root():
             "api_key": "X-API-Key: <key>"
         },
         "rate_limiting": {
-            "free": "100/hour",
-            "pro": "1000/hour",
-            "enterprise": "10000/hour"
+            "free": "10/min, 100/hour, 1,000/day",
+            "premium": "100/min, 1,000/hour, 10,000/day",
+            "pro": "1,000/min, 10,000/hour, 100,000/day"
         }
-    }
-
-# Health check endpoint
-@app.get("/health", tags=["Health"])
-async def health_check():
-    """
-    Health check endpoint for monitoring and load balancers.
-    
-    Returns a simple 200 OK response to indicate the API is running.
-    Can be extended to check database connectivity, Redis, etc.
-    
-    Returns:
-        dict: Health status
-    """
-    return {
-        "status": "healthy",
     }
 
 # Global exception handler for unhandled exceptions

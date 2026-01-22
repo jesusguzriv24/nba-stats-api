@@ -1,8 +1,8 @@
 from typing import List, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
@@ -13,7 +13,7 @@ from app.schemas.api_usage_log import APIUsageLogResponse
 
 router = APIRouter()
 
-@router.get("/logs", response_model=List[APIUsageLogResponse])
+@router.get("/", response_model=List[APIUsageLogResponse])
 async def get_api_usage_logs(
     api_key_id: int = Query(..., description="ID of the API Key to fetch logs for"),
     endpoint: Optional[str] = Query(None, description="Filter by endpoint path (exact match)"),
@@ -24,6 +24,7 @@ async def get_api_usage_logs(
     end_date: Optional[datetime] = Query(None, description="Filter logs created before this date (inclusive)"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Max number of records to return"),
+    response: Response = None,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -72,11 +73,21 @@ async def get_api_usage_logs(
     if end_date:
         query = query.where(APIUsageLog.created_at <= end_date)
 
-    # 3. Apply pagination and ordering
+    # 3. Get total count for pagination
+    count_query = select(func.count()).select_from(query.subquery())
+    total_count_result = await db.execute(count_query)
+    total_count = total_count_result.scalar_one()
+
+    # 4. Apply pagination and ordering
     query = query.order_by(APIUsageLog.created_at.desc()).offset(skip).limit(limit)
 
-    # 4. Execute query
+    # 5. Execute query
     result = await db.execute(query)
     logs = result.scalars().all()
+
+    # 6. Set response headers
+    if response:
+        response.headers["X-Total-Count"] = str(total_count)
+        response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
 
     return logs

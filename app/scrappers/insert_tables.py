@@ -443,7 +443,7 @@ async def populate_games_and_stats(df: pd.DataFrame):
                     if not p_name or str(p_name).strip().upper() in ["NO INFO", ""]:
                         continue
 
-                    p_id = get_player_id(p_name, player_map)
+                    p_id = get_player_id(p_name, p_team_id, player_map)
                     if not p_id:
                         continue
 

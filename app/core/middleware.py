@@ -149,10 +149,14 @@ async def usage_logging_middleware(request: Request, call_next):
                     print(f"[ERROR] Failed to log API usage in background: {log_error}")
 
             # Get background_tasks from response or create new if not present
-            if not hasattr(response, "background"):
+            # hasattr(response, "background") is True even if it's None for FastAPI responses
+            if getattr(response, "background", None) is None:
                 response.background = BackgroundTasks()
             
-            response.background.add_task(run_log_api_usage)
+            try:
+                response.background.add_task(run_log_api_usage)
+            except Exception as e:
+                print(f"[ERROR] Failed to add background task for API usage logging: {e}")
     
     return response
 

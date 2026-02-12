@@ -172,11 +172,17 @@ async def get_current_user_from_api_key(
     
         print(f"Validating API Key: {api_key[:20]}...")
     
-        # Query all active, non-revoked, non-expired API keys
+        # Extract the last 8 characters from the provided key for efficient filtering
+        provided_last_chars = api_key[-8:]
+        print(f"Filtering keys by last_chars: {provided_last_chars}")
+
+        # Query only active, non-revoked, non-expired API keys that match the last_chars
+        # This significantly narrows down the search space for Argon2 verification
         result = await db.execute(
             select(APIKey)
             .where(APIKey.is_active == True)
             .where(APIKey.revoked_at.is_(None))
+            .where(APIKey.last_chars == provided_last_chars)
             .where(
                 or_(
                 APIKey.expires_at.is_(None),
@@ -184,20 +190,20 @@ async def get_current_user_from_api_key(
                 )
             )
         )
-        active_keys = result.scalars().all()
+        potential_keys = result.scalars().all()
 
-        print(f"Total active keys in DB: {len(active_keys)}")
+        print(f"Potential keys matching last_chars: {len(potential_keys)}")
     
-        # Verify the provided key against each stored hash (secure comparison using Argon2)
+        # Verify the provided key against the narrow set of potential keys
         matched_key = None
-        for db_key in active_keys:
+        for db_key in potential_keys:
             if verify_api_key(api_key, db_key.key_hash):
                 matched_key = db_key
                 break
     
         # If no matching key found, authentication fails
         if not matched_key:
-            print(f"Invalid or revoked API Key")
+            print(f"Invalid or revoked API Key (checked {len(potential_keys)} potential matches)")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid or revoked API key",

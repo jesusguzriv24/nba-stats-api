@@ -26,8 +26,8 @@ class Game(Base):
     # ------------------------------------------------------------------
     date = Column(Date, nullable=False, index=True)
     season = Column(Integer, nullable=False, index=True)  # e.g., 2024 for the 2024-25 season
-    game_type = Column(SQLAlchemyEnum(GameType), default=GameType.RS, nullable=False)
-    status = Column(String, default="Scheduled") # "Scheduled", "Final"
+    game_type = Column(SQLAlchemyEnum(GameType), default=GameType.RS, nullable=False, index=True)
+    status = Column(String, default="Scheduled", index=True) # "Scheduled", "Final"
 
     # ------------------------------------------------------------------
     # TEAMS (Foreign Keys)

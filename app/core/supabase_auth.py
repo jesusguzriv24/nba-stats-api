@@ -27,7 +27,7 @@ security = HTTPBearer(auto_error=False)
 _jwks_cache = None
 
 
-def get_jwks():
+async def get_jwks():
     """
     Fetch JWKS (JSON Web Key Set) from Supabase.
     Caches the result to avoid repeated requests.
@@ -48,11 +48,13 @@ def get_jwks():
     
     jwks_url = f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json"
     
+    import httpx
     try:
         print(f"[INFO] Fetching JWKS from: {jwks_url}")
-        response = requests.get(jwks_url, timeout=10)
-        response.raise_for_status()
-        _jwks_cache = response.json()
+        async with httpx.AsyncClient() as client:
+            response = await client.get(jwks_url, timeout=10)
+            response.raise_for_status()
+            _jwks_cache = response.json()
         print(f"[SUCCESS] JWKS fetched successfully")
         return _jwks_cache
     except Exception as e:
@@ -63,7 +65,7 @@ def get_jwks():
         )
 
 
-def get_public_key_for_kid(kid: str) -> dict:
+async def get_public_key_for_kid(kid: str) -> dict:
     """
     Get the public key (JWK) for a specific Key ID.
     
@@ -73,7 +75,7 @@ def get_public_key_for_kid(kid: str) -> dict:
     Returns:
         dict: JWK (JSON Web Key)
     """
-    jwks = get_jwks()
+    jwks = await get_jwks()
     
     for key in jwks.get("keys", []):
         if key.get("kid") == kid:
@@ -85,7 +87,7 @@ def get_public_key_for_kid(kid: str) -> dict:
     )
 
 
-def decode_supabase_jwt(token: str) -> dict:
+async def decode_supabase_jwt(token: str) -> dict:
     """
     Decode and validate JWT from Supabase.
     
@@ -148,7 +150,7 @@ def decode_supabase_jwt(token: str) -> dict:
             )
         
         # Get public key from JWKS
-        public_key_jwk = get_public_key_for_kid(kid)
+        public_key_jwk = await get_public_key_for_kid(kid)
         
         try:
             # Decode using public key
@@ -272,7 +274,7 @@ async def get_current_user_from_supabase(
         return None
     
     # Decode and validate JWT
-    payload = decode_supabase_jwt(credentials.credentials)
+    payload = await decode_supabase_jwt(credentials.credentials)
     
     # Get or create user in database
     user = await get_or_create_user_from_jwt(payload, db)

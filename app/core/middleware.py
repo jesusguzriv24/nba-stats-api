@@ -74,26 +74,6 @@ async def usage_logging_middleware(request: Request, call_next):
     
     This middleware tracks every API request and logs it to the database.
     It captures request details, response status, and performance metrics.
-    
-    Logged information:
-    - User ID and API key ID (if authenticated)
-    - Endpoint and HTTP method
-    - Response status code and time
-    - Client IP address and user agent
-    - Whether request was rate limited
-    
-    This data is used for:
-    - Usage analytics and reporting
-    - Rate limit enforcement auditing
-    - Performance monitoring
-    - Security analysis
-    
-    Args:
-        request (Request): Incoming FastAPI request
-        call_next: Next middleware/endpoint in chain
-        
-    Returns:
-        Response: Original response from endpoint
     """
     # Record start time for response time calculation
     start_time = time.time()
@@ -104,21 +84,11 @@ async def usage_logging_middleware(request: Request, call_next):
     ip_address = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
     
-    # Initialize variables for user/api_key (set by authentication)
-    user_id = None
-    api_key_id = None
-    rate_limit_plan = None
-    rate_limited = False
-    
     # Process the request
     try:
         response = await call_next(request)
         status_code = response.status_code
         error_message = None
-        
-        # Check if this was a rate limit error
-        if status_code == 429:
-            rate_limited = True
         
     except Exception as e:
         # If request failed with exception, log it
@@ -131,6 +101,12 @@ async def usage_logging_middleware(request: Request, call_next):
         # Calculate response time
         response_time_ms = int((time.time() - start_time) * 1000)
         
+        # Initialize variables for user/api_key (set by authentication)
+        user_id = None
+        api_key_id = None
+        rate_limit_plan = None
+        rate_limited = (status_code == 429)
+
         # Extract user and API key info if available
         if hasattr(request.state, "user"):
             user_id = request.state.user.id
@@ -141,33 +117,42 @@ async def usage_logging_middleware(request: Request, call_next):
         if hasattr(request.state, "subscription_plan"):
             rate_limit_plan = request.state.subscription_plan.plan_name
         
-        # Log the usage (async, don't wait for completion)
+        # Log the usage using FastAPI BackgroundTasks to avoid delaying the response
         if user_id:
-            try:
-                # Import here to avoid circular imports
-                from app.core.dependencies import log_api_usage
-                from app.core.database import async_session_maker
-                
-                # Create a new DB session for logging
-                async with async_session_maker() as db:
-                    await log_api_usage(
-                        db=db,
-                        user_id=user_id,
-                        api_key_id=api_key_id,
-                        endpoint=endpoint,
-                        http_method=http_method,
-                        status_code=status_code,
-                        response_time_ms=response_time_ms,
-                        ip_address=ip_address,
-                        user_agent=user_agent,
-                        request_id=None,  # Can add request ID tracking if needed
-                        rate_limit_plan=rate_limit_plan,
-                        rate_limited=rate_limited,
-                        error_message=error_message
-                    )
-            except Exception as log_error:
-                # Don't fail the request if logging fails
-                print(f"[ERROR] Failed to log API usage: {log_error}")
+            from fastapi import BackgroundTasks
+            
+            # Helper function to run log_api_usage in the background
+            async def run_log_api_usage():
+                try:
+                    # Import here to avoid circular imports
+                    from app.core.dependencies import log_api_usage
+                    from app.core.database import async_session_maker
+                    
+                    # Create a new DB session for logging
+                    async with async_session_maker() as db:
+                        await log_api_usage(
+                            db=db,
+                            user_id=user_id,
+                            api_key_id=api_key_id,
+                            endpoint=endpoint,
+                            http_method=http_method,
+                            status_code=status_code,
+                            response_time_ms=response_time_ms,
+                            ip_address=ip_address,
+                            user_agent=user_agent,
+                            request_id=getattr(request.state, "request_id", None),
+                            rate_limit_plan=rate_limit_plan,
+                            rate_limited=rate_limited,
+                            error_message=error_message
+                        )
+                except Exception as log_error:
+                    print(f"[ERROR] Failed to log API usage in background: {log_error}")
+
+            # Get background_tasks from response or create new if not present
+            if not hasattr(response, "background"):
+                response.background = BackgroundTasks()
+            
+            response.background.add_task(run_log_api_usage)
     
     return response
 
